@@ -1,0 +1,472 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "description": "Banks and mortgage lenders, with how each makes money from housing.",
+    "schema_version": 1,
+    "last_updated": "2026-05-21"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-79.3811, 43.6477] },
+      "properties": {
+        "name": "Royal Bank of Canada (RBC)",
+        "country": "Canada",
+        "city": "Toronto",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 17,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold", "construction_finance"],
+        "how_they_make_money": "5-year fixed mortgages with mandatory renewal. Each renewal resets the amortization clock — frontloaded interest restarts. Also finances developers' construction loans on the same projects whose units they later mortgage to buyers.",
+        "notable": "Big 6 Canadian bank. CMHC-insured mortgages transfer default risk to the federal government while RBC keeps the interest."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-79.3801, 43.6481] },
+      "properties": {
+        "name": "Toronto-Dominion Bank (TD)",
+        "country": "Canada",
+        "city": "Toronto",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 16,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold", "construction_finance"],
+        "how_they_make_money": "Same renewal-reset model as RBC. Heavy in HELOCs (home equity lines of credit) — turns appreciated housing into a revolving credit product the homeowner pays interest on indefinitely.",
+        "notable": "Big 6."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-79.3811, 43.6471] },
+      "properties": {
+        "name": "Scotiabank",
+        "country": "Canada",
+        "city": "Toronto",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 11,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "STEP product bundles mortgage + HELOC + credit cards under one collateral envelope — pulls more household debt under the housing-collateral umbrella, increasing total interest capture per customer.",
+        "notable": "Big 6."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-79.3808, 43.6483] },
+      "properties": {
+        "name": "Bank of Montreal (BMO)",
+        "country": "Canada",
+        "city": "Toronto",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 10,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold", "construction_finance"],
+        "how_they_make_money": "Standard renewal-reset. Major in commercial real estate lending to REITs and institutional landlords.",
+        "notable": "Big 6."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-79.3814, 43.6470] },
+      "properties": {
+        "name": "CIBC",
+        "country": "Canada",
+        "city": "Toronto",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 12,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Standard renewal-reset. Heavy uninsured mortgage exposure in Toronto/Vancouver — higher rates, higher margins, but balance-sheet risk if prices fall.",
+        "notable": "Big 6."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-73.5673, 45.5017] },
+      "properties": {
+        "name": "National Bank of Canada",
+        "country": "Canada",
+        "city": "Montreal",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 5,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Quebec-dominant; renewal-reset model.",
+        "notable": "Smallest of the Big 6."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-73.9755, 40.7553] },
+      "properties": {
+        "name": "JPMorgan Chase",
+        "country": "United States",
+        "city": "New York",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 6,
+        "revenue_models": ["origination", "servicing", "securitization", "trading"],
+        "how_they_make_money": "Originates 30-yr fixed mortgages, sells most to Fannie/Freddie, keeps the servicing fee (≈0.25% of balance annually for the life of the loan). Plus trades the MBS the loans become.",
+        "notable": "Originate-to-distribute. Loan risk leaves the balance sheet; servicing income stays."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-122.4019, 37.7945] },
+      "properties": {
+        "name": "Wells Fargo",
+        "country": "United States",
+        "city": "San Francisco",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 5,
+        "revenue_models": ["origination", "servicing", "securitization"],
+        "how_they_make_money": "Largest mortgage servicer in US for years; servicing fees on trillions in unpaid principal balance. Origination volume cyclical, servicing revenue steady.",
+        "notable": "Servicing is the annuity; origination is the funnel that feeds it."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-80.8431, 35.2271] },
+      "properties": {
+        "name": "Bank of America",
+        "country": "United States",
+        "city": "Charlotte",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 4,
+        "revenue_models": ["origination", "servicing", "securitization"],
+        "how_they_make_money": "Same originate-to-distribute model. Acquired Countrywide in 2008 — inherited both the servicing portfolio and the subprime litigation tail.",
+        "notable": "Cautionary tale: the Countrywide acquisition shows that servicing rights come with liability when underwriting was bad."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-83.0458, 42.3314] },
+      "properties": {
+        "name": "Rocket Mortgage",
+        "country": "United States",
+        "city": "Detroit",
+        "type": "mortgage_specialist_nonbank",
+        "mortgage_market_share_pct": 8,
+        "revenue_models": ["origination", "servicing_resale"],
+        "how_they_make_money": "Pure originator. Closes the loan, immediately sells it (gain-on-sale revenue), often sells servicing rights too. No deposit base — funded via warehouse lines. Volume game.",
+        "notable": "Largest US originator. Demonstrates that origination and servicing are now distinct businesses owned by different firms."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-0.0918, 51.5128] },
+      "properties": {
+        "name": "Lloyds Banking Group",
+        "country": "United Kingdom",
+        "city": "London",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 18,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Largest UK mortgage lender. Short fix terms (2/5 yr) with renewal-reset capture, like Canada. Owns Halifax — second mortgage brand under same group.",
+        "notable": "UK uses short fixes — renewals are the bank-favorable mechanism."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-0.0163, 51.5074] },
+      "properties": {
+        "name": "Barclays",
+        "country": "United Kingdom",
+        "city": "London",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 10,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold", "securitization"],
+        "how_they_make_money": "UK retail mortgages plus investment bank arm packages and trades MBS for institutional clients.",
+        "notable": "Has both a consumer mortgage book and an MBS trading desk under one roof."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-0.0235, 51.5054] },
+      "properties": {
+        "name": "HSBC",
+        "country": "United Kingdom",
+        "city": "London",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 7,
+        "revenue_models": ["origination", "servicing", "cross_border_mortgage"],
+        "how_they_make_money": "Cross-border mortgage product — Hong Kong residents buying London, mainland Chinese buying Vancouver/Toronto/Sydney. HSBC arbitrages currency, jurisdiction, and rate differentials.",
+        "notable": "The vehicle through which Asian capital enters Anglosphere housing markets."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-1.7796, 51.5557] },
+      "properties": {
+        "name": "Nationwide Building Society",
+        "country": "United Kingdom",
+        "city": "Swindon",
+        "type": "building_society_mutual",
+        "mortgage_market_share_pct": 12,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Member-owned mutual — surplus returned to members (savers + borrowers) rather than shareholders. Same mortgage product, different ownership extraction model.",
+        "notable": "Proof that the mortgage business model is not inherently extractive — corporate structure determines where the surplus goes."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [151.2093, -33.8651] },
+      "properties": {
+        "name": "Commonwealth Bank of Australia (CBA)",
+        "country": "Australia",
+        "city": "Sydney",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 25,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Variable-rate mortgages — bank passes RBA rate moves to borrowers immediately on increases, slowly on decreases (the 'mortgage cliff' asymmetry). 60%+ of Australian mortgages are variable.",
+        "notable": "Biggest of the Big 4. Australian housing/bank concentration is among highest globally."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [151.2093, -33.8688] },
+      "properties": {
+        "name": "Westpac",
+        "country": "Australia",
+        "city": "Sydney",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 20,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Variable-rate, interest-only mortgages historically common — investor-friendly, generates pure interest revenue with no principal paydown.",
+        "notable": "Big 4."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [144.9631, -37.8137] },
+      "properties": {
+        "name": "ANZ",
+        "country": "Australia",
+        "city": "Melbourne",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 14,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Variable-rate mortgages. Also significant NZ mortgage exposure.",
+        "notable": "Big 4."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [144.9631, -37.8136] },
+      "properties": {
+        "name": "National Australia Bank (NAB)",
+        "country": "Australia",
+        "city": "Melbourne",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 14,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold", "construction_finance"],
+        "how_they_make_money": "Commercial real estate strength — finances apartment developers, then mortgages the units to buyers.",
+        "notable": "Big 4. Same vertical capture pattern as Canadian Big 6."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [72.8295, 19.0596] },
+      "properties": {
+        "name": "HDFC Bank",
+        "country": "India",
+        "city": "Mumbai",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 18,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Merged with HDFC Ltd in 2023 — combined the largest home loan specialist with the largest private bank. Rates 8-9%. On a 20-yr loan, interest paid ≈ 1.8x principal.",
+        "notable": "Merger consolidated India's mortgage market dramatically."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [72.8265, 18.9332] },
+      "properties": {
+        "name": "State Bank of India (SBI)",
+        "country": "India",
+        "city": "Mumbai",
+        "type": "state_owned_bank",
+        "mortgage_market_share_pct": 24,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "State-owned. Cheapest rates (slim margin to ~7.5%), but volume is enormous — largest mortgage lender in India by book.",
+        "notable": "State ownership lowers headline rates but doesn't change the lifetime-interest-extraction model."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [72.8674, 19.0626] },
+      "properties": {
+        "name": "ICICI Bank",
+        "country": "India",
+        "city": "Mumbai",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 13,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Floating-rate home loans — reset with RBI repo rate. Borrowers absorb interest-rate risk.",
+        "notable": "Private sector leader before HDFC merger."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [72.8265, 18.9332] },
+      "properties": {
+        "name": "LIC Housing Finance",
+        "country": "India",
+        "city": "Mumbai",
+        "type": "housing_finance_specialist",
+        "mortgage_market_share_pct": 6,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Subsidiary of state insurer LIC — uses insurance float as cheap funding for mortgages. Insurance + lending vertical capture.",
+        "notable": "Insurance-funded lending — depositors' premiums effectively finance other depositors' mortgages."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [73.8567, 18.5204] },
+      "properties": {
+        "name": "Bajaj Housing Finance",
+        "country": "India",
+        "city": "Pune",
+        "type": "housing_finance_specialist",
+        "mortgage_market_share_pct": 3,
+        "revenue_models": ["origination", "servicing", "securitization"],
+        "how_they_make_money": "Fast-growing NBFC. Some securitization (PTC pools) — early-stage version of US-style MBS market.",
+        "notable": "India is on the early curve of mortgage securitization. Track this — it's how lifetime extraction multiplies."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.6821, 50.1109] },
+      "properties": {
+        "name": "Deutsche Bank",
+        "country": "Germany",
+        "city": "Frankfurt",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 4,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Long-fixed (10-15 yr) mortgages — Pfandbrief covered bonds fund the loans. Lower lifetime interest extraction than US/Canada model because rates are fixed for long periods and renewal-reset isn't standard.",
+        "notable": "German mortgage market is structurally less extractive."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.6821, 50.1110] },
+      "properties": {
+        "name": "KfW (Kreditanstalt für Wiederaufbau)",
+        "country": "Germany",
+        "city": "Frankfurt",
+        "type": "state_development_bank",
+        "mortgage_market_share_pct": 6,
+        "revenue_models": ["origination_subsidised", "energy_efficiency_loans"],
+        "how_they_make_money": "State development bank. Subsidised loans for energy-efficient renovation and first-time buyers. Operates at near-zero margin by mandate.",
+        "notable": "Counter-example: a major housing lender whose business model is not interest extraction. Worth studying as a template."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [139.7625, 35.6814] },
+      "properties": {
+        "name": "Mitsubishi UFJ Financial Group",
+        "country": "Japan",
+        "city": "Tokyo",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 13,
+        "revenue_models": ["origination", "servicing"],
+        "how_they_make_money": "Japanese mortgage rates ~1.5% — slim per-loan margin. Bank revenue comes from volume + bundled services (insurance, brokerage).",
+        "notable": "Lowest-rate developed market. Slim margins, but also slim wealth transfer from occupiers."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [139.7626, 35.6815] },
+      "properties": {
+        "name": "Japan Housing Finance Agency (JHF)",
+        "country": "Japan",
+        "city": "Tokyo",
+        "type": "state_backed_agency",
+        "mortgage_market_share_pct": 8,
+        "revenue_models": ["securitization_state_backed"],
+        "how_they_make_money": "State-backed long-fixed (Flat 35) mortgages, securitized via JHF MBS. Government effectively underwrites the rate stability.",
+        "notable": "Japan's equivalent of Fannie/Freddie."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [114.1602, 22.2802] },
+      "properties": {
+        "name": "HSBC Hong Kong",
+        "country": "Hong Kong",
+        "city": "Hong Kong",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 28,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold", "cross_border_mortgage"],
+        "how_they_make_money": "Dominant HK mortgage lender. HIBOR-linked variable rates. Cross-border lending into London (see HSBC London entry).",
+        "notable": "Same parent group as HSBC London — fully vertically integrated cross-border mortgage operation."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [114.1611, 22.2790] },
+      "properties": {
+        "name": "Bank of China (Hong Kong)",
+        "country": "Hong Kong",
+        "city": "Hong Kong",
+        "type": "state_owned_bank",
+        "mortgage_market_share_pct": 18,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Channels mainland Chinese borrower demand into HK property. State ownership = political utility lever.",
+        "notable": "Mortgage lending as instrument of capital channeling, not just profit."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [103.8514, 1.2839] },
+      "properties": {
+        "name": "DBS Bank",
+        "country": "Singapore",
+        "city": "Singapore",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 30,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Largest SG mortgage lender. SORA-linked floating rates after recent reform. HDB (public housing) loans go through HDB itself, not banks — so DBS competes mainly for private condo + executive condo segment.",
+        "notable": "Singapore's public-private housing split limits bank capture on ~80% of housing stock."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [103.8515, 1.2840] },
+      "properties": {
+        "name": "OCBC",
+        "country": "Singapore",
+        "city": "Singapore",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 22,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Same private-segment focus as DBS.",
+        "notable": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [4.9181, 52.3354] },
+      "properties": {
+        "name": "ING",
+        "country": "Netherlands",
+        "city": "Amsterdam",
+        "type": "commercial_bank",
+        "mortgage_market_share_pct": 16,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Long-fixed Dutch mortgages, often 20-30 yr fixed — like German model. NHG (national mortgage guarantee) transfers default risk to the state.",
+        "notable": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [5.1214, 52.0907] },
+      "properties": {
+        "name": "Rabobank",
+        "country": "Netherlands",
+        "city": "Utrecht",
+        "type": "cooperative_bank",
+        "mortgage_market_share_pct": 20,
+        "revenue_models": ["origination", "servicing", "balance_sheet_hold"],
+        "how_they_make_money": "Cooperative — like Nationwide UK. Member-owned. Largest NL mortgage lender by some measures.",
+        "notable": "Another non-shareholder ownership structure providing the same product."
+      }
+    }
+  ]
+}
