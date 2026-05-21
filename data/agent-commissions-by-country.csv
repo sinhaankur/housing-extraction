@@ -1,0 +1,16 @@
+country,total_commission_low_pct,total_commission_high_pct,who_pays,notes
+United States,5,6,seller_pays_both_sides,global outlier; Sitzer-Burnett 2023 settlement
+Canada,5,6,seller_pays_both_sides,global outlier
+Australia,2,3,seller_only,buyer often unrepresented
+United Kingdom,1,3,seller_only,no buyer agent typical
+Netherlands,1,2,seller,
+Sweden,1,2,seller,
+Norway,1,2,seller,Richmond Fed cites <2%
+Ireland,1,2,seller,Richmond Fed cites <2%
+India,1.7,1.7,split_buyer_seller,
+Japan,3,3,both_sides_separately,legal cap 3% + 60000 JPY
+Hong Kong,0.75,0.75,both_sides,
+South Korea,0.55,0.55,both_sides,
+Singapore,1.5,1.5,seller,
+Denmark,,,seller,buyers commonly unrepresented
+South Africa,7.5,7.5,seller,global high

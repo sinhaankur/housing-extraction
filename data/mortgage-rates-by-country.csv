@@ -1,0 +1,8 @@
+country,rate_year,typical_30yr_rate_pct,rate_structure,interest_on_500k_full_term_usd,notes
+United States,2026,6.6,30yr_fixed,650000,2.3x principal
+Canada,2026,4.1,5yr_fixed_renewable,400000,varies with renewals; resets clock
+United Kingdom,2026,4.5,2yr_fixed_renewable,,most mortgages renewed; highly variable
+Australia,2026,6.0,variable,580000,
+India,2026,8.5,variable,880000,1.8-2.0x principal over 20yr typical
+Germany,2026,3.8,10-15yr_fixed,340000,
+Japan,2026,1.5,variable_or_short_fixed,120000,lowest in developed world

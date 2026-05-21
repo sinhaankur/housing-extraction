@@ -1,0 +1,12 @@
+city,country,segment,sale_price_per_sqft_usd,build_cost_per_sqft_usd,developer_margin_per_sqft_usd,avg_unit_price_usd,year,notes
+Toronto,Canada,downtown high-rise condo,~700,665-775,125-235,700000,2026,GTA Homes per-sqft breakdown; assumes CAD~USD parity for illustration
+Mumbai,India,residential,,,,,,placeholder - add data
+Bangalore,India,residential,,,,,,placeholder - add data
+New York,United States,Manhattan condo,,,,,,placeholder - add data
+San Francisco,United States,condo,,,,,,placeholder - add data
+London,United Kingdom,Zone 1-2 flat,,,,,,placeholder - add data
+Sydney,Australia,apartment,,,,,,placeholder - add data
+Tokyo,Japan,manshon,,,,,,placeholder - add data
+Hong Kong,Hong Kong,residential,,,,,,placeholder - add data
+Singapore,Singapore,condominium,,,,,,placeholder - add data
+Berlin,Germany,apartment,,,,,,placeholder - add data

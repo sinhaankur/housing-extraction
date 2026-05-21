@@ -1,0 +1,9 @@
+country,segment,gross_margin_low_pct,gross_margin_high_pct,net_margin_low_pct,net_margin_high_pct,notes
+Canada,Toronto preconstruction condo,12,20,,,Toronto Realty Blog
+Canada,Toronto preconstruction condo (publicly traded builders),20,25,,,Quora industry note
+Canada,Toronto preconstruction condo (high end),,25,,,GTA Homes
+Global,benchmark per textbook,15,25,,,Getrefm; industry standard
+India,listed players (DLF Godrej Lodha Prestige) residential,25,35,12,18,net margins after financing
+United States,residential development,15,25,,,clusters with global band
+Australia,residential development,15,25,,,clusters with global band
+United Kingdom,residential development,15,25,,,clusters with global band
