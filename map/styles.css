@@ -871,6 +871,112 @@ h2.display { font-size: clamp(2rem, 4.5vw, 3.25rem); }
 .flow-legend .l-line.medium { background: var(--warm); height: 2.5px; }
 .flow-legend .l-line.light { background: oklch(0.45 0 0); }
 
+/* Flow diagram interactivity */
+.flow-card-split {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.25rem;
+}
+@media (max-width: 1100px) {
+  .flow-card-split { grid-template-columns: 1fr; }
+}
+.flow-diagram-pane { min-width: 0; }
+.flow-hint {
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+  margin-bottom: 0.625rem;
+  letter-spacing: 0.04em;
+}
+
+.flow-host svg .flow-node { cursor: pointer; transition: opacity 0.18s ease; }
+.flow-host svg.has-active .flow-node.dim { opacity: 0.18; }
+.flow-host svg .flow-node.active .flow-node-rect {
+  stroke-width: 2;
+  filter: drop-shadow(0 0 8px oklch(0.645 0.246 16.439 / 0.55));
+}
+.flow-host svg .flow-node.linked .flow-node-rect { stroke-width: 1.5; }
+.flow-host svg .flow-node:focus { outline: none; }
+.flow-host svg .flow-edge-g { transition: opacity 0.18s ease; }
+.flow-host svg.has-active .flow-edge-g.dim { opacity: 0.12; }
+.flow-host svg.has-active .flow-edge-g.active .flow-edge { stroke-width: 3; }
+
+/* Side panel */
+.flow-panel {
+  background: oklch(0.18 0 0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.25rem 1rem;
+  font-size: 13px;
+  align-self: stretch;
+}
+.flow-panel em {
+  color: var(--muted-foreground);
+  font-style: italic;
+  font-family: var(--font-italic);
+  font-size: 14px;
+}
+.flow-panel-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--muted-foreground);
+  margin-bottom: 0.5rem;
+}
+.flow-panel-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+  line-height: 1.15;
+}
+.flow-panel-headline {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--pop);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+.flow-panel-section {
+  margin-bottom: 0.875rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.625rem;
+}
+.flow-panel-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin-bottom: 6px;
+}
+.flow-panel ul {
+  list-style: none;
+  margin: 0; padding: 0;
+}
+.flow-panel li {
+  font-size: 12px;
+  padding: 3px 0;
+  line-height: 1.4;
+}
+.flow-panel-other {
+  font-weight: 500;
+  color: var(--foreground);
+}
+.flow-panel-detail {
+  color: var(--muted-foreground);
+}
+.flow-panel-empty { color: var(--muted-foreground); font-style: italic; }
+.flow-panel-note {
+  margin: 0.75rem 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+  border-top: 1px solid var(--border);
+  padding-top: 0.875rem;
+}
+
 /* ───────── Charts (line/bar) ───────── */
 .charts-grid {
   display: grid;

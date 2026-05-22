@@ -145,43 +145,161 @@ const HIST = {
   },
 };
 
-// Flow diagram: nodes with positions (viewBox 1200×520) and edges with weights.
+// Flow diagram: nodes with positions (viewBox 1400×640) and edges.
+// `t` on an edge is label position along the path (0-1). Stagger to avoid collisions.
 const FLOW_NODES = [
-  // [id,             label,                role,        x,     y,    sub               ]
-  ['buyer',           'Buyer / Occupier',   'occupier',  600,   38,   'every dollar'],
-  ['bank',            'Bank',               'extractor', 175,   165,  'interest · servicing'],
-  ['developer',       'Developer',          'extractor', 395,   165,  'one-time margin'],
-  ['govt',            'Government',         'state',     615,   165,  'direct + indirect tax'],
-  ['agent',           'Realtor',            'extractor', 835,   165,  'commission on resale'],
-  ['insurer',         'Insurer',            'extractor', 1050,  165,  'CMHC + title'],
-  ['mbs',             'MBS Market',         'market',    175,   295,  'loans → bonds'],
-  ['construction',    'Construction',       'market',    345,   295,  'labour + materials'],
-  ['land',            'Land owner',         'market',    490,   295,  'site cost'],
-  ['public',          'Public services',    'state',     615,   295,  'schools, transit, debt'],
-  ['reinsurer',       'Reinsurer',          'market',    1050,  295,  'risk laid off'],
-  ['cb',              'Central bank',       'state',     175,   420,  'QE buys MBS'],
-  ['foreign',         'Foreign capital',    'market',    490,   420,  'buys condos · deposits'],
-  ['oil',             'Oil exporter',       'market',    835,   420,  'petrodollar recycling'],
+  // [id,             label,              role,        x,     y,    sub]
+  ['buyer',           'Buyer / Occupier', 'occupier',  700,   60,   'every dollar in'],
+  // Layer 1: direct extractors
+  ['bank',            'Bank',             'extractor', 140,   240,  'interest · servicing'],
+  ['developer',       'Developer',        'extractor', 420,   240,  'one-time margin'],
+  ['govt',            'Government',       'state',     700,   240,  'direct + indirect tax'],
+  ['agent',           'Realtor',          'extractor', 980,   240,  'commission on resale'],
+  ['insurer',         'Insurer',          'extractor', 1260,  240,  'CMHC + title'],
+  // Layer 2: markets / inputs
+  ['mbs',             'MBS Market',       'market',    140,   420,  'loans → bonds'],
+  ['construction',    'Construction',     'market',    360,   420,  'labour + materials'],
+  ['land',            'Land owner',       'market',    560,   420,  'site cost'],
+  ['public',          'Public services',  'state',     780,   420,  'schools · transit · debt'],
+  ['reinsurer',       'Reinsurer',        'market',    1260,  420,  'risk laid off'],
+  // Layer 3: system
+  ['cb',              'Central bank',     'state',     140,   590,  'QE buys MBS'],
+  ['foreign',         'Foreign capital',  'market',    600,   590,  'condos · deposits'],
+  ['oil',             'Oil exporter',     'market',    960,   590,  'petrodollar source'],
 ];
+
+// Each edge: [source, target, weight, label, t (position along path 0-1), curve]
 const FLOW_EDGES = [
-  // [source,    target,         weight,    label,                       curve ]
-  ['buyer',     'bank',         'heavy',    'mortgage interest $190k',   'down'],
-  ['buyer',     'developer',    'heavy',    'purchase $700k',            'down'],
-  ['buyer',     'govt',         'medium',   'direct taxes $144k',        'down'],
-  ['buyer',     'agent',        'medium',   'commissions $73k',          'down'],
-  ['buyer',     'insurer',      'light',    'premiums $35k',             'down'],
-  ['bank',      'mbs',          'heavy',    'loans sold as MBS',         'down'],
-  ['bank',      'govt',         'light',    'corp tax (indirect)',       'down-right'],
-  ['developer', 'construction', 'medium',   'build cost',                'down'],
-  ['developer', 'land',         'medium',   'land cost',                 'down-right'],
-  ['developer', 'govt',         'medium',   'dev charges + corp tax',    'down-right'],
-  ['agent',     'govt',         'light',    'income tax (indirect)',     'down-left'],
-  ['insurer',   'reinsurer',    'light',    'reinsurance',               'down'],
-  ['mbs',       'cb',           'heavy',    'QE buys MBS',               'down'],
-  ['foreign',   'bank',         'medium',   'deposits → lending',        'up'],
-  ['oil',       'foreign',      'medium',   'petrodollar recycling',     'left'],
-  ['cb',        'bank',         'heavy',    'reserves → more lending',   'feedback-up'],
+  ['buyer',     'bank',         'heavy',  'mortgage interest $190k', 0.55, 'down'],
+  ['buyer',     'developer',    'heavy',  'purchase $700k',          0.45, 'down'],
+  ['buyer',     'govt',         'medium', 'direct taxes $144k',      0.55, 'down'],
+  ['buyer',     'agent',        'medium', 'commissions $73k',        0.45, 'down'],
+  ['buyer',     'insurer',      'light',  'premiums $35k',           0.55, 'down'],
+  ['bank',      'mbs',          'heavy',  'loans → MBS',             0.5,  'down'],
+  ['bank',      'govt',         'light',  'corp tax',                0.4,  'down-right'],
+  ['developer', 'construction', 'medium', 'build cost',              0.5,  'down'],
+  ['developer', 'land',         'medium', 'land cost',               0.5,  'down-right'],
+  ['developer', 'govt',         'medium', 'dev charges',             0.4,  'down-right-short'],
+  ['agent',     'govt',         'light',  'income tax',              0.6,  'down-left'],
+  ['insurer',   'reinsurer',    'light',  'reinsurance',             0.5,  'down'],
+  ['mbs',       'cb',           'heavy',  'QE buys MBS',             0.5,  'down'],
+  ['foreign',   'bank',         'medium', 'deposits → lending',      0.6,  'up'],
+  ['oil',       'foreign',      'medium', 'petrodollar recycling',   0.5,  'left'],
+  ['cb',        'bank',         'heavy',  'reserves → lending',      0.5,  'feedback-up'],
 ];
+
+// Per-node detail panel content (shown on hover / click).
+const FLOW_DETAIL = {
+  buyer: {
+    headline: 'Pays for everything',
+    takes: ['shelter (use value)', 'sometimes: nominal appreciation'],
+    gives: [
+      ['Bank',       'mortgage interest + servicing'],
+      ['Developer',  'purchase price'],
+      ['Government', 'HST + LTT + property tax'],
+      ['Realtor',    'commission on each resale'],
+      ['Insurer',    'CMHC + title premiums'],
+    ],
+    note: 'Every node above the buyer collects on every transaction. Most "appreciation" is currency expansion, not real growth — see section 03.',
+  },
+  bank: {
+    headline: 'The continuous extractor',
+    takes: [
+      ['Buyer',         'interest + servicing'],
+      ['Foreign capital','cheap deposit funding'],
+      ['Central bank',  'reserves (post-QE)'],
+    ],
+    gives: [
+      ['MBS market',  'loans bundled as bonds'],
+      ['Government',  'corporate tax (indirect)'],
+    ],
+    note: 'The only extractor that earns continuously. Each cycle resets the amortization clock — frontloaded interest schedule restarts for the next buyer.',
+  },
+  developer: {
+    headline: 'One-time extractor',
+    takes: [['Buyer', 'purchase price']],
+    gives: [
+      ['Construction', 'labour + materials'],
+      ['Land owner',   'site cost'],
+      ['Government',   'dev charges + corp tax'],
+    ],
+    note: '15–25% gross margins typical. Uses pre-sale deposits as construction working capital — the buyer carries the risk before completion.',
+  },
+  govt: {
+    headline: 'Direct + indirect taxer',
+    takes: [
+      ['Buyer',     'HST + LTT + property tax'],
+      ['Bank',      'corp tax'],
+      ['Developer', 'dev charges + corp tax'],
+      ['Realtor',   'income tax'],
+    ],
+    gives: [['Public services', 'schools, transit, debt servicing']],
+    note: 'Strong fiscal incentive to keep transaction volume up — aligns government with the other extractors and against affordability.',
+  },
+  agent: {
+    headline: 'Recurring matcher',
+    takes: [['Buyer', 'commission on every resale']],
+    gives: [['Government', 'income tax']],
+    note: '5–6% in US/Canada is a global outlier. UK/Australia: 1–3%. The buyer-agent commission is paid by the seller but recommended by the buyer\'s own agent — that\'s why internet disruption never collapsed it.',
+  },
+  insurer: {
+    headline: 'Risk channel',
+    takes: [['Buyer', 'CMHC + title premiums']],
+    gives: [['Reinsurer', 'reinsurance premiums']],
+    note: 'CMHC transfers mortgage default risk to the federal government in Canada. Banks keep the interest, taxpayers absorb the defaults.',
+  },
+  mbs: {
+    headline: 'Financialization conduit',
+    takes: [['Bank', 'mortgage pools']],
+    gives: [['Central bank', 'MBS sold under QE']],
+    note: 'Turns frontloaded interest into a tradeable security. Each derivative layer (CDO, CDS) generates fees without adding shelter.',
+  },
+  construction: {
+    headline: 'The only physical input',
+    takes: [['Developer', 'build payment']],
+    gives: [['Government', 'corporate + payroll tax']],
+    note: '~$665–775 per sqft to actually build a downtown Toronto condo. The real cost of shelter, before everything else stacks on top.',
+  },
+  land: {
+    headline: 'Site value',
+    takes: [['Developer', 'land cost']],
+    gives: [],
+    note: 'Restrictive zoning + demand growth, not absolute scarcity, drives land prices in most major markets.',
+  },
+  public: {
+    headline: 'Notional return on taxes',
+    takes: [['Government', 'tax revenue']],
+    gives: [['Buyer (indirect)', 'transit, schools, services']],
+    note: 'Much of public revenue services existing debt and pensions before reaching new services.',
+  },
+  reinsurer: {
+    headline: 'Tail risk',
+    takes: [['Insurer', 'premiums']],
+    gives: [],
+    note: 'Backstops insurer balance sheets — invisible to buyers but sets the floor of insurable risk.',
+  },
+  cb: {
+    headline: 'Unlimited backstop',
+    takes: [['MBS market', 'MBS via QE']],
+    gives: [['Bank', 'reserves → lending capacity']],
+    note: 'Post-2008, central banks became structural MBS buyers. The housing-credit loop now has an explicit policy backstop — and the housing inflation that follows.',
+  },
+  foreign: {
+    headline: 'Capital recycling',
+    takes: [['Oil exporter', 'petrodollar inflow']],
+    gives: [
+      ['Bank',  'cheap funding'],
+      ['Buyer market', 'direct condo purchases'],
+    ],
+    note: 'USD reserve-currency status routes surplus capital from oil + trade-surplus economies into US/Anglosphere real estate.',
+  },
+  oil: {
+    headline: 'Petrodollar origin',
+    takes: ['oil revenue (USD)'],
+    gives: [['Foreign capital', 'recycled into USD assets']],
+    note: '1974 Saudi-US agreement is still load-bearing in 2026. Its slow erosion is the current open question.',
+  },
+};
 
 // Presets for bank explorer (set after features load).
 const PRESETS = {
@@ -875,61 +993,108 @@ function drawWageGap() {
 
 function drawFlow() {
   const host = $('#flow-diagram');
-  const W = 1200, H = 520;
-  const nodeW = 142, nodeH = 50;
+  const W = 1400, H = 660;
+  const nodeW = 158, nodeH = 56;
+  const nodesById = Object.fromEntries(
+    FLOW_NODES.map(([id,label,role,x,y,sub]) => [id, {id,label,role,x,y,sub}])
+  );
 
-  const nodesById = Object.fromEntries(FLOW_NODES.map(([id,label,role,x,y,sub]) => [id, {id,label,role,x,y,sub}]));
-
-  // Edge path: simple cubic between source bottom and target top, with offsets for the feedback arrow.
-  function edgePath(s, t, curve) {
-    const sx = s.x, sy = s.y + nodeH/2;
-    const tx = t.x, ty = t.y - nodeH/2;
+  // Compute a smooth cubic Bezier path from a source node to a target node,
+  // depending on the desired curve shape. Each curve returns {path, p0, c1, c2, p1}.
+  function edgeGeom(s, t, curve) {
     if (curve === 'feedback-up') {
-      // arrow going UP from CB back to BANK along the left side
-      const sxF = s.x - nodeW/2 - 10, syF = s.y;
-      const txF = t.x - nodeW/2 - 10, tyF = t.y;
-      return `M${sxF},${syF} C${sxF - 70},${syF - 30} ${txF - 70},${tyF + 30} ${txF},${tyF}`;
+      // From central bank LEFT side, arching up around the left of the diagram, back to bank LEFT side.
+      const p0 = { x: s.x - nodeW/2 - 8, y: s.y };
+      const p1 = { x: t.x - nodeW/2 - 8, y: t.y };
+      const c1 = { x: p0.x - 90, y: p0.y - 30 };
+      const c2 = { x: p1.x - 90, y: p1.y + 30 };
+      return { p0, c1, c2, p1 };
     }
     if (curve === 'up') {
-      const sxU = s.x, syU = s.y - nodeH/2;
-      const txU = t.x, tyU = t.y + nodeH/2;
-      const cx = (sxU + txU) / 2;
-      return `M${sxU},${syU} C${cx},${syU - 40} ${cx},${tyU + 40} ${txU},${tyU}`;
+      const p0 = { x: s.x, y: s.y - nodeH/2 };
+      const p1 = { x: t.x, y: t.y + nodeH/2 };
+      const mx = (p0.x + p1.x) / 2;
+      const c1 = { x: mx, y: p0.y - 60 };
+      const c2 = { x: mx, y: p1.y + 60 };
+      return { p0, c1, c2, p1 };
     }
     if (curve === 'left') {
-      const sxL = s.x - nodeW/2, syL = s.y;
-      const txL = t.x + nodeW/2, tyL = t.y;
-      return `M${sxL},${syL} C${sxL - 50},${syL} ${txL + 50},${tyL} ${txL},${tyL}`;
+      const p0 = { x: s.x - nodeW/2, y: s.y };
+      const p1 = { x: t.x + nodeW/2, y: t.y };
+      const c1 = { x: p0.x - 30, y: p0.y };
+      const c2 = { x: p1.x + 30, y: p1.y };
+      return { p0, c1, c2, p1 };
     }
-    // default down (cubic between bottom of source and top of target)
-    const cy1 = sy + 36;
-    const cy2 = ty - 36;
-    return `M${sx},${sy} C${sx},${cy1} ${tx},${cy2} ${tx},${ty}`;
+    if (curve === 'down-right-short') {
+      // Tight bend to avoid colliding with adjacent edges (developer→govt).
+      const p0 = { x: s.x + 30, y: s.y + nodeH/2 };
+      const p1 = { x: t.x - 30, y: t.y - nodeH/2 };
+      const c1 = { x: p0.x + 30, y: p0.y + 60 };
+      const c2 = { x: p1.x - 30, y: p1.y - 30 };
+      return { p0, c1, c2, p1 };
+    }
+    if (curve === 'down-right' || curve === 'down-left') {
+      const sign = curve === 'down-right' ? 1 : -1;
+      const p0 = { x: s.x + sign * 20, y: s.y + nodeH/2 };
+      const p1 = { x: t.x - sign * 20, y: t.y - nodeH/2 };
+      const c1 = { x: p0.x, y: (p0.y + p1.y) / 2 };
+      const c2 = { x: p1.x, y: (p0.y + p1.y) / 2 };
+      return { p0, c1, c2, p1 };
+    }
+    // default 'down'
+    const p0 = { x: s.x, y: s.y + nodeH/2 };
+    const p1 = { x: t.x, y: t.y - nodeH/2 };
+    const dy = p1.y - p0.y;
+    const c1 = { x: p0.x, y: p0.y + dy * 0.5 };
+    const c2 = { x: p1.x, y: p1.y - dy * 0.5 };
+    return { p0, c1, c2, p1 };
   }
 
-  function edgeMidpoint(s, t, curve) {
-    if (curve === 'feedback-up') return { x: s.x - 70, y: (s.y + t.y) / 2, anchor: 'start' };
-    if (curve === 'up')           return { x: (s.x + t.x) / 2, y: ((s.y - nodeH/2) + (t.y + nodeH/2)) / 2, anchor: 'middle' };
-    if (curve === 'left')         return { x: (s.x + t.x) / 2, y: s.y - 8, anchor: 'middle' };
-    return { x: (s.x + t.x) / 2, y: (s.y + t.y) / 2 + 4, anchor: 'middle' };
+  // Evaluate cubic Bezier at parameter t (0..1) — used to place the label.
+  function bezierPoint(g, t) {
+    const u = 1 - t;
+    return {
+      x: u*u*u*g.p0.x + 3*u*u*t*g.c1.x + 3*u*t*t*g.c2.x + t*t*t*g.p1.x,
+      y: u*u*u*g.p0.y + 3*u*u*t*g.c1.y + 3*u*t*t*g.c2.y + t*t*t*g.p1.y,
+    };
   }
 
-  const edges = FLOW_EDGES.map(([sId, tId, weight, label, curve]) => {
-    const s = nodesById[sId], t = nodesById[tId];
-    if (!s || !t) return '';
-    const path = edgePath(s, t, curve);
-    const mid = edgeMidpoint(s, t, curve);
+  function pathStr(g) {
+    return `M${g.p0.x},${g.p0.y} C${g.c1.x},${g.c1.y} ${g.c2.x},${g.c2.y} ${g.p1.x},${g.p1.y}`;
+  }
+
+  // Build edge SVG with associated source/target ids so we can highlight on hover.
+  const edges = FLOW_EDGES.map(([sId, tId, weight, label, t, curve], i) => {
+    const s = nodesById[sId], tgt = nodesById[tId];
+    if (!s || !tgt) return '';
+    const g = edgeGeom(s, tgt, curve);
+    const pos = bezierPoint(g, t);
+
+    // Place label slightly offset so it doesn't sit on top of the path.
+    const dx = g.p1.x - g.p0.x;
+    const dy = g.p1.y - g.p0.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = -dy / len, ny = dx / len; // unit normal
+    const labelOffset = 9;
+    const labelX = pos.x + nx * labelOffset;
+    const labelY = pos.y + ny * labelOffset + 3;
+
     return `
-      <path d="${path}" class="flow-edge ${weight}" />
-      <text class="flow-edge-label ${weight}" x="${mid.x}" y="${mid.y}" text-anchor="${mid.anchor}">${esc(label)}</text>
+      <g class="flow-edge-g" data-source="${sId}" data-target="${tId}">
+        <path d="${pathStr(g)}" class="flow-edge ${weight}" />
+        <g class="flow-edge-label-wrap">
+          <text class="flow-edge-label ${weight}" x="${labelX}" y="${labelY}" text-anchor="middle"
+                paint-order="stroke" stroke="oklch(0.145 0 0)" stroke-width="3" stroke-linejoin="round">${esc(label)}</text>
+        </g>
+      </g>
     `;
   }).join('');
 
   const nodes = FLOW_NODES.map(([id,label,role,x,y,sub]) => `
-    <g class="flow-node" data-id="${id}">
-      <rect class="flow-node-rect role-${role}" x="${x - nodeW/2}" y="${y - nodeH/2}" width="${nodeW}" height="${nodeH}" rx="8" />
+    <g class="flow-node" data-id="${id}" tabindex="0">
+      <rect class="flow-node-rect role-${role}" x="${x - nodeW/2}" y="${y - nodeH/2}" width="${nodeW}" height="${nodeH}" rx="9" />
       <text class="flow-node-text" x="${x}" y="${y - 2}" text-anchor="middle">${esc(label)}</text>
-      <text class="flow-node-sub" x="${x}" y="${y + 14}" text-anchor="middle">${esc(sub)}</text>
+      <text class="flow-node-sub" x="${x}" y="${y + 16}" text-anchor="middle">${esc(sub)}</text>
     </g>
   `).join('');
 
@@ -937,7 +1102,7 @@ function drawFlow() {
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
       <defs>
         <marker id="flow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 z" fill="oklch(0.45 0 0)"/>
+          <path d="M0,0 L10,5 L0,10 z" fill="oklch(0.55 0 0)"/>
         </marker>
         <marker id="flow-arrow-pop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 z" fill="oklch(0.645 0.246 16.439)"/>
@@ -946,9 +1111,106 @@ function drawFlow() {
           <path d="M0,0 L10,5 L0,10 z" fill="oklch(0.769 0.188 70.08)"/>
         </marker>
       </defs>
-      ${edges}
-      ${nodes}
+      <g class="flow-edges-layer">${edges}</g>
+      <g class="flow-nodes-layer">${nodes}</g>
     </svg>
+  `;
+
+  wireFlowInteractivity();
+  // Open buyer by default so the panel is populated.
+  selectFlowNode('buyer');
+}
+
+let flowLockedId = null;
+
+function wireFlowInteractivity() {
+  const svg = $('#flow-diagram svg');
+  if (!svg) return;
+  svg.querySelectorAll('.flow-node').forEach(node => {
+    const id = node.dataset.id;
+    node.addEventListener('mouseenter', () => { if (!flowLockedId) highlightFlow(id); });
+    node.addEventListener('mouseleave', () => { if (!flowLockedId) clearFlowHighlight(); });
+    node.addEventListener('click', e => {
+      e.stopPropagation();
+      if (flowLockedId === id) {
+        flowLockedId = null;
+        clearFlowHighlight();
+        selectFlowNode('buyer');
+      } else {
+        flowLockedId = id;
+        highlightFlow(id);
+        selectFlowNode(id);
+      }
+    });
+    node.addEventListener('focus', () => { highlightFlow(id); selectFlowNode(id); });
+  });
+  svg.addEventListener('click', e => {
+    if (!e.target.closest('.flow-node')) {
+      flowLockedId = null;
+      clearFlowHighlight();
+      selectFlowNode('buyer');
+    }
+  });
+}
+
+function highlightFlow(id) {
+  const svg = $('#flow-diagram svg');
+  if (!svg) return;
+  svg.classList.add('has-active');
+  svg.querySelectorAll('.flow-node').forEach(n => {
+    n.classList.toggle('active', n.dataset.id === id);
+    n.classList.toggle('dim', n.dataset.id !== id);
+  });
+  svg.querySelectorAll('.flow-edge-g').forEach(eg => {
+    const linked = eg.dataset.source === id || eg.dataset.target === id;
+    eg.classList.toggle('active', linked);
+    eg.classList.toggle('dim', !linked);
+    // Also highlight nodes on the other end of active edges
+    if (linked) {
+      const other = eg.dataset.source === id ? eg.dataset.target : eg.dataset.source;
+      const otherNode = svg.querySelector(`.flow-node[data-id="${other}"]`);
+      if (otherNode) {
+        otherNode.classList.remove('dim');
+        otherNode.classList.add('linked');
+      }
+    }
+  });
+}
+
+function clearFlowHighlight() {
+  const svg = $('#flow-diagram svg');
+  if (!svg) return;
+  svg.classList.remove('has-active');
+  svg.querySelectorAll('.flow-node').forEach(n => n.classList.remove('active','dim','linked'));
+  svg.querySelectorAll('.flow-edge-g').forEach(e => e.classList.remove('active','dim'));
+}
+
+function selectFlowNode(id) {
+  const panel = $('#flow-panel');
+  if (!panel) return;
+  const d = FLOW_DETAIL[id];
+  const node = FLOW_NODES.find(n => n[0] === id);
+  if (!d || !node) return;
+  const [_, label, role, , , sub] = node;
+  const renderList = list => list.length === 0
+    ? '<li class="flow-panel-empty">—</li>'
+    : list.map(item => {
+        if (Array.isArray(item)) return `<li><span class="flow-panel-other">${esc(item[0])}</span> <span class="flow-panel-detail">${esc(item[1])}</span></li>`;
+        return `<li class="flow-panel-detail">${esc(item)}</li>`;
+      }).join('');
+  panel.innerHTML = `
+    <div class="flow-panel-eyebrow">${esc(role.toUpperCase())} · ${esc(sub)}</div>
+    <h3 class="flow-panel-title">${esc(label)}</h3>
+    <div class="flow-panel-headline">${esc(d.headline)}</div>
+    <div class="flow-panel-section">
+      <div class="flow-panel-label">Takes from</div>
+      <ul>${renderList(d.takes)}</ul>
+    </div>
+    <div class="flow-panel-section">
+      <div class="flow-panel-label">Pays / sends to</div>
+      <ul>${renderList(d.gives)}</ul>
+    </div>
+    <p class="flow-panel-note">${esc(d.note)}</p>
   `;
 }
 

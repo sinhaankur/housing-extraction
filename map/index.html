@@ -198,13 +198,19 @@
         Follow a dollar from the buyer through the system. Thick red lines = high-volume flows; warm lines = medium; thin grey = small but structural. Every node above the buyer is collecting from every transaction that touches this asset.
       </p>
 
-      <div class="flow-card">
-        <div class="flow-host" id="flow-diagram"></div>
-        <div class="flow-legend">
-          <span class="l-item"><span class="l-line heavy"></span>Heavy flow ($100k+ per transaction)</span>
-          <span class="l-item"><span class="l-line medium"></span>Medium flow ($10–100k)</span>
-          <span class="l-item"><span class="l-line light"></span>Structural / small</span>
+      <div class="flow-card flow-card-split">
+        <div class="flow-diagram-pane">
+          <div class="flow-hint mono">Hover a node to trace its flows · click to lock · click empty area to reset</div>
+          <div class="flow-host" id="flow-diagram"></div>
+          <div class="flow-legend">
+            <span class="l-item"><span class="l-line heavy"></span>Heavy flow ($100k+ per transaction)</span>
+            <span class="l-item"><span class="l-line medium"></span>Medium flow ($10–100k)</span>
+            <span class="l-item"><span class="l-line light"></span>Structural / small</span>
+          </div>
         </div>
+        <aside class="flow-panel" id="flow-panel">
+          <em>Select a node to see what it takes and what it pays.</em>
+        </aside>
       </div>
     </div>
   </section>
