@@ -44,26 +44,59 @@
     </div>
   </section>
 
-  <!-- ━━━━━━━━━━━━━━━━ 01 MAP ━━━━━━━━━━━━━━━━ -->
-  <section id="map-section" class="section">
-    <div class="inner">
-      <div class="eyebrow">01 — The map</div>
-      <h2 class="display">Where the <em>banks</em> live.</h2>
-      <p class="section-sub" style="margin-bottom:1.75rem">
-        33 lenders, 11 countries. Color marks the structural type — commercial, state, mutual, specialist. Filter further in the bank explorer below; markers reflect what's visible there. Click a marker to jump to that lender's card.
-      </p>
-      <div id="map-wrap">
-        <div id="map"></div>
-        <div id="map-controls">
-          <button class="map-chip active" id="map-fit">Fit to world</button>
-        </div>
-        <div id="map-legend">
-          <span class="legend-item"><span class="legend-dot dot-commercial"></span>Commercial</span>
-          <span class="legend-item"><span class="legend-dot dot-state"></span>State / GSE</span>
-          <span class="legend-item"><span class="legend-dot dot-mutual"></span>Mutual / Coop</span>
-          <span class="legend-item"><span class="legend-dot dot-specialist"></span>Specialist</span>
+  <!-- ━━━━━━━━━━━━━━━━ 01 WORLD MAP ━━━━━━━━━━━━━━━━ -->
+  <section id="map-section" class="india-fullbleed world-map-section">
+    <div class="india-shell">
+
+      <div class="india-map-side">
+        <div id="map-wrap">
+          <div id="map"></div>
+          <div id="map-controls">
+            <button class="map-chip active" id="map-fit">Fit to world</button>
+          </div>
+          <div id="map-legend">
+            <span class="legend-item"><span class="legend-dot dot-commercial"></span>Commercial</span>
+            <span class="legend-item"><span class="legend-dot dot-state"></span>State / GSE</span>
+            <span class="legend-item"><span class="legend-dot dot-mutual"></span>Mutual / Coop</span>
+            <span class="legend-item"><span class="legend-dot dot-specialist"></span>Specialist</span>
+          </div>
         </div>
       </div>
+
+      <aside class="india-side-panel">
+        <header class="india-side-header">
+          <div class="eyebrow">01 — World map</div>
+          <h2 class="display india-display">Where the <em>extractors</em> live.</h2>
+          <p class="india-side-sub">
+            33 lenders across 11 countries. Color marks the structural type. Pick a preset to filter; click any marker to see how that specific lender extracts value.
+          </p>
+        </header>
+
+        <div class="india-controls">
+          <div class="india-view-group" role="tablist" aria-label="Preset">
+            <button class="ind-btn active" data-world-preset="all">All</button>
+            <button class="ind-btn" data-world-preset="state">State</button>
+            <button class="ind-btn" data-world-preset="mutual">Mutuals</button>
+            <button class="ind-btn" data-world-preset="crossborder">Cross-border</button>
+            <button class="ind-btn" data-world-preset="securitizers">Securitizers</button>
+            <button class="ind-btn" data-world-preset="construction">Construction</button>
+            <button class="ind-btn" data-world-preset="asia">Asia</button>
+            <button class="ind-btn" data-world-preset="anglo">Anglosphere</button>
+          </div>
+          <div class="india-year-group" style="flex-wrap:wrap">
+            <input type="search" id="world-search" placeholder="Search lender, city, or country" autocomplete="off" style="flex:1;min-width:200px;font:inherit;font-size:12.5px;padding:6px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:transparent;color:var(--foreground)" />
+            <span class="india-year-value mono" id="world-count">– of –</span>
+          </div>
+        </div>
+
+        <div id="world-detail" class="india-detail">
+          <div class="india-detail-empty">
+            <div class="eyebrow">No lender selected</div>
+            <p class="india-detail-empty-body">Click a marker on the map (or pick a preset above) to see the specific mechanism that lender uses to capture value — origination, servicing, securitization, balance-sheet hold, or cross-border arbitrage.</p>
+          </div>
+        </div>
+      </aside>
+
     </div>
   </section>
 

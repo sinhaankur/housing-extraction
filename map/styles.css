@@ -274,6 +274,29 @@ h2.display { font-size: clamp(2rem, 4.5vw, 3.25rem); }
 .map-chip:hover { color: var(--foreground); border-color: var(--border-strong); }
 .map-chip.active { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
 
+/* World-map section uses the same single-screen shell as India.
+   Markers click → side panel updates inline (no modal, no scroll). */
+.world-map-section { padding: 0 !important; max-width: none !important; margin: 0 !important; }
+.world-map-section + .section { border-top: none; }
+.world-map-section .india-side-panel { background: oklch(0.105 0 0); }
+
+/* Tighter detail panel sizing so click-to-detail fits without internal scroll
+   on typical viewports (~720px tall). Both world + India panels benefit. */
+.india-detail-head { padding-bottom: 0.55rem; margin-bottom: 0.55rem; }
+.india-detail-name { font-size: 18px; }
+.india-stat { padding: 0.4rem 0.55rem; }
+.india-stat .value { font-size: 13px; }
+.india-stat .label { margin-bottom: 1px; }
+.india-stat-grid { gap: 0.4rem; margin-bottom: 0.65rem; }
+.india-detail-section-title { margin: 0.55rem 0 0.3rem; font-size: 9.5px; }
+#india-spark { height: 88px; margin-bottom: 0.25rem; }
+.india-spark-legend { margin-bottom: 0.3rem; font-size: 9.5px; }
+.india-proscons { gap: 0.45rem; }
+.india-pc { padding: 0.45rem 0.6rem; }
+.india-pc h4 { margin-bottom: 0.25rem; font-size: 9.5px; }
+.india-pc li { font-size: 11.5px; margin-bottom: 0.25rem; line-height: 1.4; padding-left: 0.7rem; }
+.india-pc li::before { top: 0.5rem; width: 3px; height: 3px; }
+
 /* ───────── India fiscal section — single-screen, map left / panel right ───────── */
 #india-section.india-fullbleed {
   background: oklch(0.115 0 0);
@@ -736,6 +759,96 @@ h2.display { font-size: clamp(2rem, 4.5vw, 3.25rem); }
   height: 2px;
   vertical-align: middle;
   margin-right: 4px;
+}
+
+.india-gov-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+.india-gov-cell {
+  background: oklch(0.18 0 0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.6rem;
+}
+.india-gov-cell .label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin-bottom: 1px;
+}
+.india-gov-cell .value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--foreground);
+  letter-spacing: 0.01em;
+}
+.india-gov-cell .sub {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--muted-foreground);
+  opacity: 0.7;
+  margin-top: 1px;
+}
+
+.india-depts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-top: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+.india-dept-col {
+  background: oklch(0.17 0 0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.7rem;
+}
+.india-dept-col.back  { border-left: 2px solid oklch(0.65 0.18 250); }
+.india-dept-col.front { border-left: 2px solid oklch(0.78 0.16 70); }
+.india-dept-col h4 {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin: 0 0 0.45rem;
+}
+.india-dept-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.india-dept-col li {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
+}
+.india-dept-col li:last-child { margin-bottom: 0; }
+.india-dept-col li .name {
+  display: block;
+  font-weight: 500;
+}
+.india-dept-col li .note {
+  display: block;
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+  margin-top: 1px;
+  line-height: 1.4;
+}
+
+.india-caveat {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--muted-foreground);
+  line-height: 1.45;
+  margin: 0.4rem 0;
+  opacity: 0.75;
 }
 
 .india-proscons {

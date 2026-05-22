@@ -664,14 +664,86 @@ function makeMarker(feature) {
   const m = L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], { icon, riseOnHover: true });
   m.on('mouseover', () => setHover(p.name));
   m.on('mouseout', () => setHover(null));
-  m.on('click', () => {
-    document.getElementById('banks').scrollIntoView({ behavior: 'smooth' });
-    setTimeout(() => {
-      const card = document.querySelector(`.bank-card[data-name="${CSS.escape(p.name)}"]`);
-      if (card) { card.scrollIntoView({ behavior:'smooth', block:'center' }); openDetail(p); }
-    }, 500);
-  });
+  // Click → render the lender detail inline in the world-map side panel (no scroll, no modal).
+  m.on('click', () => openWorldDetail(p));
   return m;
+}
+
+function openWorldDetail(p) {
+  const panel = document.getElementById('world-detail');
+  if (!panel) return;
+  const share = p.mortgage_market_share_pct ?? null;
+  panel.innerHTML = `
+    <div class="india-detail-head">
+      <div>
+        <div class="india-detail-name">${esc(p.name)}</div>
+        <div class="india-detail-meta">${esc(p.city)}, ${esc(p.country)} · ${esc(nice(p.type))}</div>
+      </div>
+      <button class="india-back-btn" id="world-back">← Clear</button>
+    </div>
+
+    <div class="india-stat-grid">
+      <div class="india-stat"><div class="label">Country</div><div class="value" style="font-size:13px">${esc(p.country)}</div></div>
+      <div class="india-stat"><div class="label">Mortgage share</div><div class="value">${share == null ? '–' : share + '%'}</div></div>
+      <div class="india-stat" style="grid-column:span 2"><div class="label">Type</div><div class="value" style="font-size:13px">${esc(nice(p.type))}</div></div>
+    </div>
+
+    <div class="india-detail-section-title">How they make money</div>
+    <p style="font-size:12.5px;line-height:1.55;margin:0 0 0.875rem">${esc(p.how_they_make_money || '')}</p>
+
+    ${p.notable ? `
+      <div class="india-detail-section-title">Notable</div>
+      <p style="font-size:12.5px;line-height:1.55;margin:0 0 0.875rem;color:var(--muted-foreground)">${esc(p.notable)}</p>
+    ` : ''}
+
+    <div class="india-detail-section-title">Revenue mechanisms</div>
+    <div class="card-badges">${(p.revenue_models || []).map(r => `<span class="rev-badge">${esc(nice(r))}</span>`).join('')}</div>
+  `;
+  document.getElementById('world-back')?.addEventListener('click', clearWorldSelection);
+  for (const [n, m] of state.markersByName) {
+    const el = m.getElement()?.querySelector('.bank-marker');
+    if (el) el.classList.toggle('active', n === p.name);
+  }
+}
+
+function clearWorldSelection() {
+  const panel = document.getElementById('world-detail');
+  if (panel) {
+    panel.innerHTML = `
+      <div class="india-detail-empty">
+        <div class="eyebrow">No lender selected</div>
+        <p class="india-detail-empty-body">Click a marker on the map (or pick a preset above) to see the specific mechanism that lender uses to capture value.</p>
+      </div>`;
+  }
+  for (const [n, m] of state.markersByName) {
+    const el = m.getElement()?.querySelector('.bank-marker');
+    if (el) el.classList.remove('active');
+  }
+}
+
+function wireWorldPanel() {
+  document.querySelectorAll('[data-world-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-world-preset]').forEach(b => b.classList.toggle('active', b === btn));
+      applyPreset(btn.dataset.worldPreset);
+      updateWorldCount();
+    });
+  });
+  const search = document.getElementById('world-search');
+  if (search) {
+    search.addEventListener('input', e => {
+      state.search = e.target.value.trim();
+      const main = document.getElementById('search');
+      if (main) main.value = state.search;
+      render();
+      updateWorldCount();
+    });
+  }
+}
+
+function updateWorldCount() {
+  const el = document.getElementById('world-count');
+  if (el) el.textContent = `${visible().length} of ${state.features.length}`;
 }
 
 function setHover(name) {
@@ -709,6 +781,9 @@ function render() {
   renderActiveChips();
   renderFilterButtonStates();
   renderResetVisibility();
+  // Keep the world-map sidebar count in sync.
+  const wc = document.getElementById('world-count');
+  if (wc) wc.textContent = `${v.length} of ${state.features.length}`;
 }
 
 function renderCards(v) {
@@ -841,6 +916,7 @@ function applyPreset(name) {
   const p = PRESETS[name] || {};
   for (const k of ['country','type','revenue']) if (p[k]) state.filters[k] = new Set(p[k]);
   $$('.preset-btn').forEach(b => b.classList.toggle('active', b.dataset.preset === name));
+  $$('[data-world-preset]').forEach(b => b.classList.toggle('active', b.dataset.worldPreset === name));
   $$('.filter-panel input[type="checkbox"]').forEach(cb => {
     cb.checked = state.filters[cb.dataset.key]?.has(cb.dataset.value) || false;
   });
@@ -2412,7 +2488,9 @@ async function load() {
     wireCycleEngine();
     wireCountries();
     wireIndia();
+    wireWorldPanel();
     render();
+    updateWorldCount();
     drawExpense();
     drawGranularPrice();
     drawValueStack();
@@ -2506,6 +2584,7 @@ load();
   };
 
   let DATA = null;        // india-fiscal.json
+  let EXTRAS = null;      // india-extras.json
   let GEO = null;         // geojson
   let map = null;         // Leaflet map
   let geoLayer = null;    // Leaflet GeoJSON layer
@@ -2663,8 +2742,11 @@ load();
     }
     updateLegend();
     updateReadout();
-    renderSummary();
-    if (ui.state.selected) renderDetail(ui.state.selected);
+    if (ui.state.selected) {
+      renderDetail(ui.state.selected);
+    } else {
+      renderEmptyState();
+    }
     updateYearMarker();
   }
 
@@ -2681,15 +2763,60 @@ load();
     const detail = $ind('#india-detail');
     const r = rowFor(name, ui.state.yearIdx);
     if (!r) {
-      detail.innerHTML = `<div class="india-detail-empty"><div class="eyebrow">${esc(name)}</div><p class="india-detail-empty-body">No fiscal data for this UT / excluded entity in the current dataset.</p></div>`;
+      detail.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+          <div class="eyebrow">${esc(name)}</div>
+          <button class="india-back-btn" id="india-back">← Back</button>
+        </div>
+        <p class="india-detail-empty-body">No fiscal data for this UT / excluded entity in the current dataset.</p>`;
+      $ind('#india-back')?.addEventListener('click', deselectState);
       return;
     }
     const s = r.meta;
+    const ext = EXTRAS?.states?.[name] || null;
     const totalIn = r.devolution + r.grants;
     const net = totalIn - r.contribution;
     const isDonor = net < 0;
     const ratio = r.contribution > 0 ? (totalIn / r.contribution) : 0;
     const ownTaxPct = (r.ownTax / r.gsdp) * 100;
+
+    const govStrip = ext ? `
+      <div class="india-gov-strip">
+        <div class="india-gov-cell">
+          <div class="label">IAS cadre strength</div>
+          <div class="value">${ext.ias}</div>
+          <div class="sub">approved · ~25–40% on Central deputation</div>
+        </div>
+        <div class="india-gov-cell">
+          <div class="label">State employees</div>
+          <div class="value">${ext.employees_lakh} lakh</div>
+          <div class="sub">direct only · excl. contract</div>
+        </div>
+        <div class="india-gov-cell">
+          <div class="label">Bribe-paid %</div>
+          <div class="value">${ext.corruption_pct}%</div>
+          <div class="sub">CMS 2019 · last 12 mo</div>
+        </div>
+      </div>` : '';
+
+    const deptBlock = ext ? `
+      <div class="india-detail-section-title">Government departments</div>
+      <div class="india-depts">
+        <div class="india-dept-col back">
+          <h4>Back-office (high payroll · low public output)</h4>
+          <ul>
+            ${ext.dept_back.map(d => `<li><span class="name">${esc(d.name)}</span><span class="note">${esc(d.note)}</span></li>`).join('')}
+          </ul>
+        </div>
+        <div class="india-dept-col front">
+          <h4>Public-facing (citizen interaction)</h4>
+          <ul>
+            ${ext.dept_public.map(d => `<li><span class="name">${esc(d.name)}</span><span class="note">${esc(d.note)}</span></li>`).join('')}
+          </ul>
+        </div>
+      </div>
+      <p class="india-caveat">IAS counts are cadre approved-strength snapshots; a sizeable share is on Central deputation under DoPT at any given time, so this is a structural cap, not a count of officers physically present in the state.</p>
+    ` : '';
 
     detail.innerHTML = `
       <div class="india-detail-head">
@@ -2697,7 +2824,10 @@ load();
           <div class="india-detail-name">${esc(name)}</div>
           <div class="mono" style="font-size:10.5px;letter-spacing:0.04em;color:var(--muted-foreground);text-transform:uppercase;margin-top:2px">${esc(s.region)} · ${esc(s.capital)} · pop ~${s.pop_cr.toFixed(1)} cr</div>
         </div>
-        <div class="india-detail-meta">${esc(r.yearLabel)}<br/><span style="opacity:0.6">${esc(r.fcPeriod?.name ?? '—')}</span></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem">
+          <button class="india-back-btn" id="india-back">← Back</button>
+          <div class="india-detail-meta">${esc(r.yearLabel)} · <span style="opacity:0.6">${esc(r.fcPeriod?.name ?? '—')}</span></div>
+        </div>
       </div>
 
       <div class="india-stat-grid">
@@ -2709,11 +2839,13 @@ load();
         <div class="india-stat ${isDonor ? 'donor' : 'recipient'}"><div class="label">Net flow</div><div class="value">${net >= 0 ? '+' : ''}${fmtComma(net)} k cr</div></div>
       </div>
 
-      <div style="display:flex;justify-content:space-between;gap:0.6rem;font-family:var(--font-mono);font-size:11px;color:var(--muted-foreground);margin-bottom:0.85rem">
+      <div style="display:flex;justify-content:space-between;gap:0.6rem;font-family:var(--font-mono);font-size:11px;color:var(--muted-foreground);margin-bottom:0.85rem;flex-wrap:wrap">
         <span>FC share: <span style="color:var(--foreground)">${r.fcShare.toFixed(3)}%</span></span>
         <span>Own tax / GSDP: <span style="color:var(--foreground)">${ownTaxPct.toFixed(2)}%</span></span>
-        <span>In : Out ratio: <span style="color:${isDonor ? 'oklch(0.7 0.18 30)' : 'oklch(0.7 0.17 162)'}">${ratio.toFixed(2)}×</span></span>
+        <span>In : Out: <span style="color:${isDonor ? 'oklch(0.7 0.18 30)' : 'oklch(0.7 0.17 162)'}">${ratio.toFixed(2)}×</span></span>
       </div>
+
+      ${govStrip}
 
       <div class="india-detail-section-title">10-year history</div>
       <svg id="india-spark" viewBox="0 0 320 110" preserveAspectRatio="none"></svg>
@@ -2722,6 +2854,8 @@ load();
         <span><span class="sw" style="background:oklch(0.65 0.18 250)"></span>Contribution (est.)</span>
         <span><span class="sw" style="background:oklch(0.7 0.17 162)"></span>Own tax</span>
       </div>
+
+      ${deptBlock}
 
       <div class="india-detail-section-title">Pros &amp; Cons</div>
       <div class="india-proscons">
@@ -2736,6 +2870,27 @@ load();
       </div>
     `;
     drawSpark(s, ui.state.yearIdx);
+    $ind('#india-back')?.addEventListener('click', deselectState);
+  }
+
+  function renderEmptyState() {
+    const detail = $ind('#india-detail');
+    detail.innerHTML = `
+      <div class="india-detail-empty">
+        <div class="eyebrow">No state selected</div>
+        <p class="india-detail-empty-body">The map shows the active view across all states. Click any state for its history, fiscal flows, governance footprint, and pros / cons.</p>
+        <div id="india-summary" class="india-summary-inline"></div>
+      </div>`;
+    renderSummary();
+  }
+
+  function deselectState() {
+    ui.state.selected = null;
+    pathByName.forEach(layer => {
+      const el = layer._path;
+      if (el) el.classList.remove('selected');
+    });
+    renderEmptyState();
   }
 
   function drawSpark(s, yearIdx) {
@@ -2797,6 +2952,7 @@ load();
   /* ───────── summary cards: top donors / top recipients ───────── */
   function renderSummary() {
     const container = $ind('#india-summary');
+    if (!container) return;
     const view = VIEWS[ui.state.view];
     const ranked = [];
     for (const name of Object.keys(DATA.states)) {
@@ -2917,14 +3073,20 @@ load();
 
   async function bootstrap() {
     try {
-      const [geoRes, dataRes] = await Promise.all([
+      const [geoRes, dataRes, extrasRes] = await Promise.all([
         fetch('india-states.geojson'),
-        fetch('india-fiscal.json')
+        fetch('india-fiscal.json'),
+        fetch('india-extras.json')
       ]);
       if (!geoRes.ok) throw new Error('GeoJSON HTTP ' + geoRes.status);
       if (!dataRes.ok) throw new Error('Fiscal JSON HTTP ' + dataRes.status);
       GEO = await geoRes.json();
       DATA = await dataRes.json();
+      if (extrasRes.ok) {
+        EXTRAS = await extrasRes.json();
+      } else {
+        console.warn('india-extras.json missing — proceeding without governance footprint');
+      }
 
       ui.state.yearIdx = DATA._meta.years.length - 1;
       wireControls();
