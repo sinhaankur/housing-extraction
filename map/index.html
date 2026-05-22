@@ -15,7 +15,6 @@
     <div class="brand"><span class="brand-dot"></span> HOUSING EXTRACTION</div>
     <div class="nav-links">
       <a href="#map-section">01 Map</a>
-      <a href="#india-section">01b India</a>
       <a href="#expense">02 What you pay</a>
       <a href="#value-breakdown">03 Value over time</a>
       <a href="#flow">04 How it connects</a>
@@ -49,6 +48,7 @@
           <div>
             <div class="eyebrow">01 — World map</div>
             <h2 class="display india-display">Where the <em>extractors</em> live.</h2>
+            <div class="takeaway"><span class="mono">Takeaway ·</span> The same banks own the loan, package the MBS, and (post-2008) sell it back to the central bank.</div>
           </div>
         </header>
 
@@ -86,79 +86,11 @@
     </div>
   </section>
 
-  <!-- ━━━━━━━━━━━━━━━━ 01b INDIA FISCAL ━━━━━━━━━━━━━━━━ -->
-  <section id="india-section" class="india-fullbleed">
-    <div class="india-shell">
-
-      <div class="india-map-side">
-        <div id="india-map-wrap">
-          <div id="india-map"></div>
-          <div id="india-map-readout">
-            <div class="readout-label mono">Hover a state</div>
-            <div class="readout-name">—</div>
-            <div class="readout-value">—</div>
-          </div>
-          <div id="india-map-legend">
-            <div class="india-legend-title mono" id="india-legend-title">Net flow (₹ '000 cr)</div>
-            <div class="india-legend-bar"><span class="india-legend-grad" id="india-legend-grad"></span></div>
-            <div class="india-legend-ticks mono">
-              <span id="india-legend-min">—</span>
-              <span id="india-legend-mid">—</span>
-              <span id="india-legend-max">—</span>
-            </div>
-            <div class="india-legend-foot mono">Click a state for detail · drag the year slider for history</div>
-          </div>
-        </div>
-      </div>
-
-      <aside class="india-side-panel">
-        <header class="india-side-header">
-          <div>
-            <div class="eyebrow">01b — India · fiscal federalism</div>
-            <h2 class="display india-display">Who <em>feeds</em> the Union. Who gets <em>fed</em>.</h2>
-            <p class="india-side-sub">
-              Center collects most of India's taxes, sends a slice back via the Finance Commission. Click any state for its 10-year breakdown, governance footprint, and pros / cons.
-            </p>
-          </div>
-          <a class="india-ref-link" href="references.html">Sources ↗</a>
-        </header>
-
-        <div class="india-controls">
-          <div class="india-view-group" role="tablist" aria-label="View">
-            <button class="ind-btn active" data-view="netFlow">Net flow</button>
-            <button class="ind-btn" data-view="devolution">Devolution in</button>
-            <button class="ind-btn" data-view="contribution">Contribution out</button>
-            <button class="ind-btn" data-view="gsdp">GSDP</button>
-            <button class="ind-btn" data-view="ownTax">Own tax</button>
-            <button class="ind-btn" data-view="ownTaxPctGsdp">Own tax / GSDP</button>
-            <button class="ind-btn" data-view="fcShare">FC share</button>
-          </div>
-          <div class="india-year-group">
-            <span class="india-year-label mono">Year</span>
-            <input type="range" id="india-year" min="0" max="9" value="9" step="1" aria-label="Year" />
-            <span class="india-year-value mono" id="india-year-value">FY24</span>
-          </div>
-          <div class="india-fc-strip" id="india-fc-strip" aria-hidden="true"></div>
-        </div>
-
-        <div class="india-main">
-          <div id="india-detail" class="india-detail">
-            <div class="india-detail-empty">
-              <div class="eyebrow">No state selected</div>
-              <p class="india-detail-empty-body">The map shows the active view across all states. Click any state for its history, fiscal flows, governance footprint, and pros / cons.</p>
-              <div id="india-summary" class="india-summary-inline"></div>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-    </div>
-  </section>
-
   <!-- ━━━━━━━━━━━━━━━━ 02 WHAT YOU PAY ━━━━━━━━━━━━━━━━ -->
   <section id="expense" class="section">
     <div class="eyebrow">02 — What you actually pay</div>
     <h2 class="display">The sticker is <em>one number</em>. The bill is another.</h2>
+    <div class="takeaway"><span class="mono">Takeaway ·</span> The home cost ~$560k to build. The system extracted ~$680k on top.</div>
     <p class="section-sub" style="margin-bottom:2rem">
       Walk a single $700,000 Toronto condo through 10 years — purchase, year-5 resale, year-10 resale. Each layer of the bar below is real money leaving the buyer's account (or embedded in the price they paid). Hover or tap for the calculation.
     </p>
@@ -204,12 +136,19 @@
   <section id="value-breakdown" class="section">
     <div class="eyebrow">03 — Value over time</div>
     <h2 class="display">A house in 1990 was <em>three things</em>. In 2026 it's five.</h2>
-    <p class="section-sub" style="margin-bottom:1.5rem">
-      Toronto's average price went from $255k (1990) to $1.02M (2026) — but the house didn't get 4× more useful. Below: first the granular year-by-year journey of one representative unit with what drove each move, then the decomposition into the four things that make up today's price.
+    <div class="takeaway"><span class="mono">Takeaway ·</span> Wages grew ~2×. Toronto prices grew ~4×. The gap is leverage + currency expansion, not value.</div>
+    <p class="section-sub" style="margin-bottom:1.25rem">
+      Toronto's average price went from $255k (1990) to $1.02M (2026). Three views of why: a year-by-year journey, a stacked decomposition of what's in the price, and a comparison with what wages can actually sustain.
     </p>
 
+    <div class="value-tabs">
+      <button class="value-tab-btn active" data-pane="granular">Year by year</button>
+      <button class="value-tab-btn" data-pane="stack">Decomposition</button>
+      <button class="value-tab-btn" data-pane="wage">Anchored to wages</button>
+    </div>
+
     <!-- 03a — Granular per-year timeline -->
-    <div class="breakdown-card" style="margin-bottom:1.5rem">
+    <div class="breakdown-card value-pane" data-pane="granular" style="margin-bottom:1.5rem">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.5rem;flex-wrap:wrap;gap:1rem">
         <div>
           <div class="chart-title">Year-by-year · Toronto average home price</div>
@@ -227,6 +166,7 @@
       </div>
     </div>
 
+    <div class="value-pane" data-pane="stack" hidden>
     <div class="breakdown-controls">
       <button class="bd-btn active" data-city="toronto">Toronto</button>
       <button class="bd-btn" data-city="us">US median</button>
@@ -242,8 +182,11 @@
       </div>
     </div>
 
+    </div><!-- /value-pane stack -->
+
     <!-- 03c — Wage anchor: what the home should cost if pricing tracked income -->
-    <div class="breakdown-card" style="margin-top:1.5rem">
+    <div class="value-pane" data-pane="wage" hidden>
+    <div class="breakdown-card" style="margin-top:0">
       <div class="chart-title">If pricing had tracked <em style="font-family:Instrument Serif;font-style:italic">wages</em></div>
       <div class="chart-sub">Median household income × the international "affordable" threshold (Demographia / UN-Habitat: 3× = affordable, 4× = moderately unaffordable, 5+ = severely unaffordable). Toggle Toronto / US above.</div>
       <div id="wage-stats" class="wage-stat-row"></div>
@@ -255,9 +198,11 @@
       </div>
     </div>
 
-    <p class="section-sub" style="margin:1.5rem 0">
-      The mechanism is simple. When rates fall from 10% to 2%, a household with the same income can borrow <em style="font-family:Instrument Serif;font-style:italic">five times more</em> at the same monthly payment. Banks call it "affordability." It's really pricing power borrowed from the future, then handed to the seller. Add longer amortizations, lower down payments, CMHC-backed risk transfer, and securitization — each one widens the gap between what wages can sustain and what banks will lend against.
+    <p class="section-sub" style="margin:1.25rem 0">
+      The mechanism is simple. When rates fall from 10% to 2%, a household with the same income can borrow <em style="font-family:Instrument Serif;font-style:italic">five times more</em> at the same monthly payment. Banks call it "affordability." It's really pricing power borrowed from the future, then handed to the seller.
     </p>
+
+    </div><!-- /value-pane wage -->
 
     <div class="breakdown-explain">
       <div class="bd-cell c-construct">
@@ -284,6 +229,7 @@
     <div class="inner">
       <div class="eyebrow">04 — How it all connects</div>
       <h2 class="display">One <em>dollar in</em>. Twelve hands.</h2>
+      <div class="takeaway"><span class="mono">Takeaway ·</span> Every node above the buyer collects on every transaction. The central bank backstops the whole structure.</div>
       <p class="section-sub" style="margin-bottom:1.75rem">
         Follow a dollar from the buyer through the system. Thick red lines = high-volume flows; warm lines = medium; thin grey = small but structural. Every node above the buyer is collecting from every transaction that touches this asset.
       </p>
@@ -305,41 +251,11 @@
     </div>
   </section>
 
-  <!-- ━━━━━━━━━━━━━━━━ HISTORY CHARTS ━━━━━━━━━━━━━━━━ -->
-  <section id="history" class="section">
-    <div class="eyebrow">04b — Historical context</div>
-    <h2 class="display">The <em>monetary substrate</em> under the price line.</h2>
-    <p class="section-sub" style="margin-bottom:0.5rem">
-      Five charts that explain the chart above. Click an annotation dot to read why that year matters.
-    </p>
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-title">US 30-year mortgage rate</div>
-        <div class="chart-sub">1971 → 2026 · annual avg · the Volcker peak, the post-COVID low, the 2022 pivot</div>
-        <div class="chart-host" id="chart-us-rate"></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Toronto average home price</div>
-        <div class="chart-sub">1990 → 2026 · nominal CAD · 4× in 36 years</div>
-        <div class="chart-host" id="chart-toronto-price"></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">US M2 money supply</div>
-        <div class="chart-sub">1971 → 2026 · USD trillions · the denominator of every house price</div>
-        <div class="chart-host" id="chart-m2"></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Fed MBS holdings</div>
-        <div class="chart-sub">2007 → 2026 · USD trillions · zero pre-2008 · the housing backstop</div>
-        <div class="chart-host" id="chart-mbs"></div>
-      </div>
-    </div>
-  </section>
-
   <!-- ━━━━━━━━━━━━━━━━ 05 CYCLE ENGINE ━━━━━━━━━━━━━━━━ -->
   <section id="cycle-engine" class="section">
     <div class="eyebrow">05 — Cycle engine</div>
     <h2 class="display">Watch a single home <em>create value</em> every time it changes hands.</h2>
+    <div class="takeaway"><span class="mono">Takeaway ·</span> Each resale resets the bank's frontloaded interest schedule. Turnover IS extraction.</div>
     <p class="section-sub" style="margin-bottom:1.5rem">
       Set the rules. The engine runs one physical unit through N transactions and shows the same trajectory through three lenses: what each buyer experienced, what the banks captured, what happened to the asset. The house never changes. The accounting does.
     </p>
@@ -438,6 +354,7 @@
   <section id="countries" class="section">
     <div class="eyebrow">06 — Country profiles</div>
     <h2 class="display">Each country has <em>a strength</em> and <em>a weakness</em>.</h2>
+    <div class="takeaway"><span class="mono">Takeaway ·</span> Monetarily-sovereign countries (Japan, Switzerland, India) extract less. The Anglosphere extracts most.</div>
     <p class="section-sub" style="margin-bottom:1.5rem">
       16 markets, each at a different point in the global capital network. Strength = the buffer that softens monetary shocks. Weakness = the vulnerability that magnifies them. Click any card to see the corruption, geopolitics, demographics, and trade factors that shape its position.
     </p>

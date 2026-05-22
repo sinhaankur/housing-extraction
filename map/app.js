@@ -2538,6 +2538,25 @@ window.addEventListener('resize', () => {
   renderCycleEngine();
 });
 
+// Section 03 view-tabs: show one of {granular, stack, wage}, redraw on switch.
+function wireValueTabs() {
+  const btns = document.querySelectorAll('.value-tab-btn');
+  if (!btns.length) return;
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pane = btn.dataset.pane;
+      btns.forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.value-pane').forEach(p => {
+        p.hidden = p.dataset.pane !== pane;
+      });
+      // Redraw on switch so SVG measures itself against the now-visible host.
+      if (pane === 'granular') drawGranularPrice();
+      else if (pane === 'stack') drawValueStack();
+      else if (pane === 'wage') drawWageGap();
+    });
+  });
+}
+
 // Highlight the top-nav link of whichever section is currently most visible.
 function wireScrollSpy() {
   const links = Array.from(document.querySelectorAll('.nav-links a[href^="#"]'));
@@ -2589,6 +2608,7 @@ async function load() {
     wireIndia();
     wireWorldPanel();
     wireScrollSpy();
+    wireValueTabs();
     render();
     updateWorldCount();
     drawExpense();
