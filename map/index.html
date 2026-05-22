@@ -3,54 +3,248 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Housing Value Extraction — Bank Map</title>
+  <title>Housing Value Extraction Monitor — live, by country</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <aside id="sidebar">
-    <header>
-      <h1>Banks & how they extract value from housing</h1>
-      <p class="lede">Each marker is a bank or lender. Click for the specific mechanism it uses to capture interest, servicing, or trading revenue. Filter to compare across markets.</p>
-    </header>
 
-    <section class="filter-group">
-      <h2>Country</h2>
-      <div id="filter-country" class="filter-chips"></div>
-    </section>
+  <nav id="nav">
+    <div class="brand"><span class="brand-dot"></span> Housing Value Extraction Monitor</div>
+    <div class="nav-links">
+      <a href="#monitor">Live</a>
+      <a href="#geography">Geography</a>
+      <a href="#leaderboard">Countries</a>
+      <a href="#history">History</a>
+      <a href="#banks">Banks</a>
+      <a href="../README.md">Analysis ↗</a>
+    </div>
+  </nav>
 
-    <section class="filter-group">
-      <h2>Bank type</h2>
-      <div id="filter-type" class="filter-chips"></div>
-    </section>
+  <!-- ─────────────── Section 1: Live monitor ─────────────── -->
+  <section id="monitor" class="section">
+    <div class="section-bar">
+      <h2>Live extraction <span class="live-dot"></span></h2>
+      <p class="section-sub">Estimated since you opened this page. Annual figures divided across seconds — updates every 50ms.</p>
+    </div>
 
-    <section class="filter-group">
-      <h2>Revenue model</h2>
-      <div id="filter-revenue" class="filter-chips"></div>
-    </section>
+    <div class="mega-counter">
+      <div class="mega-label">GLOBAL MORTGAGE INTEREST PAID — THIS YEAR SO FAR</div>
+      <div class="mega-number" id="counter-global">$0</div>
+      <div class="mega-caption">
+        At ~$1.5T per year globally — the largest single revenue stream extracted from the housing stock.
+      </div>
+    </div>
 
-    <section class="filter-group">
-      <button id="reset-filters" class="reset-btn">Reset filters</button>
-    </section>
+    <div class="counter-grid">
+      <div class="counter-card">
+        <div class="counter-label">🇺🇸 US bank mortgage interest</div>
+        <div class="counter-number" id="counter-us">$0</div>
+        <div class="counter-sub">~$585B/yr · 2.3× the loan over 30 years</div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-label">🇨🇦 Canadian bank mortgage interest</div>
+        <div class="counter-number" id="counter-ca">$0</div>
+        <div class="counter-sub">~$90B/yr · renewal-reset model amplifies</div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-label">🇮🇳 Indian bank mortgage interest</div>
+        <div class="counter-number" id="counter-in">$0</div>
+        <div class="counter-sub">~$25B/yr · highest rate at 8.5%</div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-label">🇺🇸 US realtor commissions</div>
+        <div class="counter-number" id="counter-realtors">$0</div>
+        <div class="counter-sub">~$75B/yr · = Kenya's GDP, annually</div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-label">🌐 Global pre-construction deposits held</div>
+        <div class="counter-number" id="counter-presales">$0</div>
+        <div class="counter-sub">Working capital developers don't have to borrow</div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-label">🏛 Fed MBS holdings drained (QT)</div>
+        <div class="counter-number" id="counter-qt">$0</div>
+        <div class="counter-sub">~$0.3T/yr · the housing backstop unwinding</div>
+      </div>
+    </div>
+  </section>
 
-    <section id="stats">
-      <h2>Visible banks</h2>
-      <div id="stats-content"></div>
-    </section>
+  <!-- ─────────────── Section 2: Geography ─────────────── -->
+  <section id="geography" class="section">
+    <div class="section-bar">
+      <h2>Where the banks are</h2>
+      <p class="section-sub">33 lenders, 11 countries. Markers reflect the bank explorer's filters. Click a marker to scroll to its card.</p>
+    </div>
+    <div id="map-wrap">
+      <div id="map"></div>
+      <div id="map-legend">
+        <span class="legend-item"><span class="legend-dot dot-commercial"></span>Commercial</span>
+        <span class="legend-item"><span class="legend-dot dot-state"></span>State / GSE</span>
+        <span class="legend-item"><span class="legend-dot dot-mutual"></span>Mutual / Coop</span>
+        <span class="legend-item"><span class="legend-dot dot-specialist"></span>Specialist</span>
+      </div>
+    </div>
+  </section>
 
-    <section id="detail">
-      <h2>Selected bank</h2>
-      <div id="detail-content"><em>Click a marker to see details.</em></div>
-    </section>
+  <!-- ─────────────── Section 3: Country leaderboard ─────────────── -->
+  <section id="leaderboard" class="section">
+    <div class="section-bar">
+      <h2>Country leaderboard</h2>
+      <p class="section-sub">The structural parameters that determine how extractive each market is.</p>
+    </div>
+    <div class="leaderboard-controls">
+      <button class="lb-btn active" data-metric="mortgage_rate">Mortgage rate</button>
+      <button class="lb-btn" data-metric="mortgage_debt_gdp">Mortgage debt / GDP</button>
+      <button class="lb-btn" data-metric="commission_pct">Realtor commission</button>
+      <button class="lb-btn" data-metric="interest_on_500k">Interest on $500k mortgage</button>
+    </div>
+    <table id="leaderboard-table">
+      <thead><tr>
+        <th>#</th>
+        <th>Country</th>
+        <th class="num">Mortgage rate</th>
+        <th class="num">Mortgage / GDP</th>
+        <th class="num">Realtor %</th>
+        <th class="num">Interest on $500k</th>
+        <th>Posture</th>
+      </tr></thead>
+      <tbody id="leaderboard-body"></tbody>
+    </table>
+  </section>
 
-    <footer>
-      <p class="muted">Add a bank: edit <code>map/banks.geojson</code> and reload.<br />Schema: <a href="SCHEMA.md">SCHEMA.md</a></p>
-    </footer>
-  </aside>
+  <!-- ─────────────── Section 4: History ─────────────── -->
+  <section id="history" class="section">
+    <div class="section-bar">
+      <h2>Historical context</h2>
+      <p class="section-sub">The structural shifts that produced today's system. Data: FRED, Bank of Canada, CREA, public central-bank disclosures.</p>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">US 30-year mortgage rate</div>
+        <div class="chart-sub">1971 → 2026 · Annual average</div>
+        <div class="chart-host" id="chart-us-rate"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">US median home price</div>
+        <div class="chart-sub">1970 → 2026 · Nominal USD</div>
+        <div class="chart-host" id="chart-us-price"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Toronto average home price</div>
+        <div class="chart-sub">1990 → 2026 · Nominal CAD</div>
+        <div class="chart-host" id="chart-toronto-price"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">US M2 money supply</div>
+        <div class="chart-sub">1971 → 2026 · USD trillions · post-Bretton-Woods</div>
+        <div class="chart-host" id="chart-m2"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Fed MBS holdings</div>
+        <div class="chart-sub">2007 → 2026 · USD trillions · zero pre-crisis</div>
+        <div class="chart-host" id="chart-mbs"></div>
+      </div>
+      <div class="chart-card chart-card-bars">
+        <div class="chart-title">Mortgage debt / GDP, 2024</div>
+        <div class="chart-sub">Country exposure to a housing-driven monetary loop</div>
+        <div class="chart-host" id="chart-debtgdp"></div>
+      </div>
+    </div>
+    <p class="timeline-link">→ <a href="../data/historical/key-events.md">Read the timeline of key events</a></p>
+  </section>
 
-  <main id="map"></main>
+  <!-- ─────────────── Section 5: Bank explorer ─────────────── -->
+  <section id="banks" class="section">
+    <div class="section-bar">
+      <h2>Bank explorer</h2>
+      <p class="section-sub">The 33 lenders behind the live counters above. Filter, search, pin to compare side by side.</p>
+    </div>
+
+    <div class="presets-row">
+      <button class="preset-btn active" data-preset="all">All 33</button>
+      <button class="preset-btn" data-preset="state">🏛 State-backed</button>
+      <button class="preset-btn" data-preset="mutual">🤝 Mutuals &amp; coops</button>
+      <button class="preset-btn" data-preset="crossborder">🌍 Cross-border</button>
+      <button class="preset-btn" data-preset="securitizers">📑 Securitizers</button>
+      <button class="preset-btn" data-preset="construction">🏗 Construction financers</button>
+      <button class="preset-btn" data-preset="asia">Asia</button>
+      <button class="preset-btn" data-preset="anglo">Anglosphere</button>
+    </div>
+
+    <div class="manual-filters-row">
+      <div class="filter-dropdown" data-key="country">
+        <button class="filter-btn">Country <span class="filter-count"></span> <span class="caret">▾</span></button>
+        <div class="filter-panel" hidden></div>
+      </div>
+      <div class="filter-dropdown" data-key="type">
+        <button class="filter-btn">Bank type <span class="filter-count"></span> <span class="caret">▾</span></button>
+        <div class="filter-panel" hidden></div>
+      </div>
+      <div class="filter-dropdown" data-key="revenue">
+        <button class="filter-btn">Revenue model <span class="filter-count"></span> <span class="caret">▾</span></button>
+        <div class="filter-panel" hidden></div>
+      </div>
+      <div class="filter-spacer"></div>
+      <input type="search" id="search" placeholder="🔍 Search lender, city, or country" autocomplete="off" />
+      <span id="count" class="count">– of –</span>
+      <button id="reset-filters" class="reset-btn" hidden>Clear</button>
+    </div>
+    <div id="active-filters" class="active-filters"></div>
+
+    <div id="cards-grid"></div>
+    <div id="empty-state" class="empty-state" hidden>
+      <strong>No lenders match these filters.</strong>
+      <p>Try clearing some, or picking a different preset.</p>
+    </div>
+  </section>
+
+  <!-- Compare tray -->
+  <div id="compare-tray" hidden>
+    <div class="tray-inner">
+      <span class="tray-label">Compare</span>
+      <div id="tray-pins" class="tray-pins"></div>
+      <button id="open-compare" class="primary-btn">Side by side →</button>
+      <button id="clear-compare" class="ghost-btn">Clear</button>
+    </div>
+  </div>
+
+  <!-- Detail modal -->
+  <div id="detail-modal" class="modal" hidden role="dialog" aria-modal="true">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card">
+      <button class="modal-close" data-close aria-label="Close">×</button>
+      <div id="detail-body"></div>
+    </div>
+  </div>
+
+  <!-- Compare modal -->
+  <div id="compare-modal" class="modal" hidden role="dialog" aria-modal="true">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card modal-wide">
+      <button class="modal-close" data-close aria-label="Close">×</button>
+      <h2>Side-by-side comparison</h2>
+      <div id="compare-body"></div>
+    </div>
+  </div>
+
+  <footer id="footer">
+    <div class="footer-inner">
+      <p>Read the analysis chapters:
+        <a href="../analysis/01-developers.md">developers</a> ·
+        <a href="../analysis/02-agents.md">agents</a> ·
+        <a href="../analysis/03-banks.md">banks</a> ·
+        <a href="../analysis/04-governments.md">governments</a> ·
+        <a href="../analysis/05-patterns-and-trends.md">trends</a> ·
+        <a href="../analysis/06-financialization.md">financialization</a> ·
+        <a href="../analysis/07-universal-housing-standard.md">housing standard</a> ·
+        <a href="../analysis/08-currency-and-monetary.md">currency &amp; money</a>
+      </p>
+      <p class="muted">Editable data: <code>map/banks.geojson</code> · Historical: <code>data/historical/*.csv</code> · Schema: <a href="SCHEMA.md">SCHEMA.md</a></p>
+    </div>
+  </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
