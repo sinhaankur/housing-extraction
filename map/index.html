@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Housing Value Extraction Monitor — live, by country</title>
+  <title>Housing Extraction — how the price of a home gets paid, and to whom</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="" />
@@ -12,183 +12,250 @@
 <body>
 
   <nav id="nav">
-    <div class="brand"><span class="brand-dot"></span> Housing Value Extraction Monitor</div>
+    <div class="brand"><span class="brand-dot"></span> HOUSING EXTRACTION</div>
     <div class="nav-links">
-      <a href="#monitor">Live</a>
-      <a href="#geography">Geography</a>
-      <a href="#leaderboard">Countries</a>
-      <a href="#history">History</a>
-      <a href="#banks">Banks</a>
+      <a href="#map-section">01 Map</a>
+      <a href="#expense">02 What you pay</a>
+      <a href="#value-breakdown">03 Value over time</a>
+      <a href="#flow">04 How it connects</a>
+      <a href="#banks">05 Banks</a>
       <a href="../README.md">Analysis ↗</a>
     </div>
   </nav>
 
-  <!-- ─────────────── Section 1: Live monitor ─────────────── -->
-  <section id="monitor" class="section">
-    <div class="section-bar">
-      <h2>Live extraction <span class="live-dot"></span></h2>
-      <p class="section-sub">Estimated since you opened this page. Annual figures divided across seconds — updates every 50ms.</p>
-    </div>
-
-    <div class="mega-counter">
-      <div class="mega-label">GLOBAL MORTGAGE INTEREST PAID — THIS YEAR SO FAR</div>
-      <div class="mega-number" id="counter-global">$0</div>
-      <div class="mega-caption">
-        At ~$1.5T per year globally — the largest single revenue stream extracted from the housing stock.
+  <!-- ━━━━━━━━━━━━━━━━ HERO ━━━━━━━━━━━━━━━━ -->
+  <section id="hero" class="section">
+    <div class="eyebrow">00 — Index</div>
+    <div class="hero-grid">
+      <div>
+        <h1 class="display">A $700,000 condo costs <em>$1.24 million</em> to actually live in for ten years.</h1>
+        <p class="section-sub">
+          Every layer of the housing system — developers, banks, agents, governments, insurance, central banks — extracts a slice of the same dollar. Below: a working map of who takes what, where, and why, with the historical context showing how the gap between sticker and total opened up.
+        </p>
       </div>
-    </div>
-
-    <div class="counter-grid">
-      <div class="counter-card">
-        <div class="counter-label">🇺🇸 US bank mortgage interest</div>
-        <div class="counter-number" id="counter-us">$0</div>
-        <div class="counter-sub">~$585B/yr · 2.3× the loan over 30 years</div>
-      </div>
-      <div class="counter-card">
-        <div class="counter-label">🇨🇦 Canadian bank mortgage interest</div>
-        <div class="counter-number" id="counter-ca">$0</div>
-        <div class="counter-sub">~$90B/yr · renewal-reset model amplifies</div>
-      </div>
-      <div class="counter-card">
-        <div class="counter-label">🇮🇳 Indian bank mortgage interest</div>
-        <div class="counter-number" id="counter-in">$0</div>
-        <div class="counter-sub">~$25B/yr · highest rate at 8.5%</div>
-      </div>
-      <div class="counter-card">
-        <div class="counter-label">🇺🇸 US realtor commissions</div>
-        <div class="counter-number" id="counter-realtors">$0</div>
-        <div class="counter-sub">~$75B/yr · = Kenya's GDP, annually</div>
-      </div>
-      <div class="counter-card">
-        <div class="counter-label">🌐 Global pre-construction deposits held</div>
-        <div class="counter-number" id="counter-presales">$0</div>
-        <div class="counter-sub">Working capital developers don't have to borrow</div>
-      </div>
-      <div class="counter-card">
-        <div class="counter-label">🏛 Fed MBS holdings drained (QT)</div>
-        <div class="counter-number" id="counter-qt">$0</div>
-        <div class="counter-sub">~$0.3T/yr · the housing backstop unwinding</div>
+      <div class="hero-stat">
+        <div class="label">Sticker → total, year 1–10</div>
+        <div class="value">$700k → $1.24M</div>
+        <div class="caption">Toronto pre-construction condo, 20% down, 5-yr fixed mortgage at 4.1%, resold at year 5 and year 10. ~$540k flows to extractors; the home itself cost ~$560k to build.</div>
       </div>
     </div>
   </section>
 
-  <!-- ─────────────── Section 2: Geography ─────────────── -->
-  <section id="geography" class="section">
-    <div class="section-bar">
-      <h2>Where the banks are</h2>
-      <p class="section-sub">33 lenders, 11 countries. Markers reflect the bank explorer's filters. Click a marker to scroll to its card.</p>
-    </div>
-    <div id="map-wrap">
-      <div id="map"></div>
-      <div id="map-legend">
-        <span class="legend-item"><span class="legend-dot dot-commercial"></span>Commercial</span>
-        <span class="legend-item"><span class="legend-dot dot-state"></span>State / GSE</span>
-        <span class="legend-item"><span class="legend-dot dot-mutual"></span>Mutual / Coop</span>
-        <span class="legend-item"><span class="legend-dot dot-specialist"></span>Specialist</span>
+  <!-- ━━━━━━━━━━━━━━━━ 01 MAP ━━━━━━━━━━━━━━━━ -->
+  <section id="map-section" class="section">
+    <div class="inner">
+      <div class="eyebrow">01 — The map</div>
+      <h2 class="display">Where the <em>banks</em> live.</h2>
+      <p class="section-sub" style="margin-bottom:1.75rem">
+        33 lenders, 11 countries. Color marks the structural type — commercial, state, mutual, specialist. Filter further in the bank explorer below; markers reflect what's visible there. Click a marker to jump to that lender's card.
+      </p>
+      <div id="map-wrap">
+        <div id="map"></div>
+        <div id="map-controls">
+          <button class="map-chip active" id="map-fit">Fit to world</button>
+        </div>
+        <div id="map-legend">
+          <span class="legend-item"><span class="legend-dot dot-commercial"></span>Commercial</span>
+          <span class="legend-item"><span class="legend-dot dot-state"></span>State / GSE</span>
+          <span class="legend-item"><span class="legend-dot dot-mutual"></span>Mutual / Coop</span>
+          <span class="legend-item"><span class="legend-dot dot-specialist"></span>Specialist</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ─────────────── Section 3: Country leaderboard ─────────────── -->
-  <section id="leaderboard" class="section">
-    <div class="section-bar">
-      <h2>Country leaderboard</h2>
-      <p class="section-sub">The structural parameters that determine how extractive each market is.</p>
+  <!-- ━━━━━━━━━━━━━━━━ 02 WHAT YOU PAY ━━━━━━━━━━━━━━━━ -->
+  <section id="expense" class="section">
+    <div class="eyebrow">02 — What you actually pay</div>
+    <h2 class="display">The sticker is <em>one number</em>. The bill is another.</h2>
+    <p class="section-sub" style="margin-bottom:2rem">
+      Walk a single $700,000 Toronto condo through 10 years — purchase, year-5 resale, year-10 resale. Each layer of the bar below is real money leaving the buyer's account (or embedded in the price they paid). Hover or tap for the calculation.
+    </p>
+
+    <div class="flow-card">
+      <div class="flow-host" id="expense-chart"></div>
+      <div class="flow-legend">
+        <span class="l-item"><span class="l-line heavy"></span>Direct money out</span>
+        <span class="l-item"><span class="l-line medium"></span>Indirect / embedded in price</span>
+        <span class="l-item"><span class="l-line light"></span>The home itself</span>
+      </div>
     </div>
-    <div class="leaderboard-controls">
-      <button class="lb-btn active" data-metric="mortgage_rate">Mortgage rate</button>
-      <button class="lb-btn" data-metric="mortgage_debt_gdp">Mortgage debt / GDP</button>
-      <button class="lb-btn" data-metric="commission_pct">Realtor commission</button>
-      <button class="lb-btn" data-metric="interest_on_500k">Interest on $500k mortgage</button>
+
+    <div class="breakdown-explain" style="margin-top:2rem">
+      <div class="bd-cell c-construct">
+        <div class="h">The home (≈ $560k)</div>
+        <div class="b">Construction labour, materials, land, dev profit. The only layer that produces shelter. Paid once, at first sale.</div>
+      </div>
+      <div class="bd-cell c-finance">
+        <div class="h">Direct taxes (≈ $144k)</div>
+        <div class="b">HST on new build (~$50k), land transfer tax × 3 sales (~$45k), property tax × 10 yrs (~$49k). Visible on closing statements.</div>
+      </div>
+      <div class="bd-cell c-currency">
+        <div class="h">Indirect taxes (≈ $98k)</div>
+        <div class="b">HST on materials & services (~$32k embedded), corporate tax on developer profit (~$35k), corporate tax on bank interest (~$24k), development charges & permit fees passed through (~$7k of the build cost line).</div>
+      </div>
+      <div class="bd-cell c-land">
+        <div class="h">Bank interest (≈ $190k)</div>
+        <div class="b">10 years of mortgage interest across two renewals. Frontloaded — 65–75% of every monthly payment in year 1.</div>
+      </div>
+      <div class="bd-cell c-finance">
+        <div class="h">Realtor commissions (≈ $73k)</div>
+        <div class="b">5% on the year-5 resale, 5% on the year-10 resale. Each is full price × 5%, regardless of whether the agents added any value.</div>
+      </div>
+      <div class="bd-cell c-currency">
+        <div class="h">Insurance & fees (≈ $35k)</div>
+        <div class="b">CMHC mortgage default insurance (~$30k on a 5% down loan), title insurance, legal fees, appraisal, condo fees over 10 yrs (separate from above).</div>
+      </div>
     </div>
-    <table id="leaderboard-table">
-      <thead><tr>
-        <th>#</th>
-        <th>Country</th>
-        <th class="num">Mortgage rate</th>
-        <th class="num">Mortgage / GDP</th>
-        <th class="num">Realtor %</th>
-        <th class="num">Interest on $500k</th>
-        <th>Posture</th>
-      </tr></thead>
-      <tbody id="leaderboard-body"></tbody>
-    </table>
   </section>
 
-  <!-- ─────────────── Section 4: History ─────────────── -->
+  <!-- ━━━━━━━━━━━━━━━━ 03 VALUE OVER TIME ━━━━━━━━━━━━━━━━ -->
+  <section id="value-breakdown" class="section">
+    <div class="eyebrow">03 — Value over time</div>
+    <h2 class="display">A house in 1990 was <em>three things</em>. In 2026 it's five.</h2>
+    <p class="section-sub" style="margin-bottom:1.5rem">
+      Toronto's average price went from $255k (1990) to $1.02M (2026) — but the house didn't get 4× more useful. Below: first the granular year-by-year journey of one representative unit with what drove each move, then the decomposition into the four things that make up today's price.
+    </p>
+
+    <!-- 03a — Granular per-year timeline -->
+    <div class="breakdown-card" style="margin-bottom:1.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.5rem;flex-wrap:wrap;gap:1rem">
+        <div>
+          <div class="chart-title">Year-by-year · Toronto average home price</div>
+          <div class="chart-sub">1990 → 2026 · CAD thousands · hover any year to see what drove that move</div>
+        </div>
+        <div id="granular-readout" class="mono" style="font-size:11px;color:var(--muted-foreground);text-align:right;min-width:280px">
+          Hover the line to read each year.
+        </div>
+      </div>
+      <div class="chart-host" id="granular-chart" style="height:340px"></div>
+      <div class="flow-legend" style="margin-top:0.5rem">
+        <span class="l-item"><span class="l-line heavy"></span>Major event</span>
+        <span class="l-item"><span class="l-line medium"></span>Policy shift</span>
+        <span class="l-item"><span class="l-line light"></span>Year tick</span>
+      </div>
+    </div>
+
+    <div class="breakdown-controls">
+      <button class="bd-btn active" data-city="toronto">Toronto</button>
+      <button class="bd-btn" data-city="us">US median</button>
+    </div>
+
+    <div class="breakdown-card">
+      <div class="chart-host" id="value-stack"></div>
+      <div class="breakdown-legend">
+        <span class="legend-stack"><span class="swatch s-construct"></span>Real construction cost</span>
+        <span class="legend-stack"><span class="swatch s-land"></span>Land scarcity</span>
+        <span class="legend-stack"><span class="swatch s-currency"></span>Currency expansion</span>
+        <span class="legend-stack"><span class="swatch s-finance"></span>Financialization premium</span>
+      </div>
+    </div>
+
+    <div class="breakdown-explain">
+      <div class="bd-cell c-construct">
+        <div class="h">Real construction cost</div>
+        <div class="b">Materials + labour to physically build the unit. Tracks construction cost index (~2.5–3.5%/yr inflation). The only component anchored to physical reality.</div>
+      </div>
+      <div class="bd-cell c-land">
+        <div class="h">Land scarcity</div>
+        <div class="b">Zoning + demand + restrictive supply. Real in the sense that land is finite — but in Toronto, restrictive zoning is the dominant driver, not absolute land shortage.</div>
+      </div>
+      <div class="bd-cell c-currency">
+        <div class="h">Currency expansion</div>
+        <div class="b">M2 money supply growth above productive GDP. Post-1971 fiat regime — accelerated by post-2008 QE and 2020 COVID expansion. Same house, expanding unit of account.</div>
+      </div>
+      <div class="bd-cell c-finance">
+        <div class="h">Financialization premium</div>
+        <div class="b">The price you pay because housing is now a leveraged asset class. Includes MBS demand, foreign capital channeling (petrodollar recycling), and speculation. Residual after the other three.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ━━━━━━━━━━━━━━━━ 04 HOW IT CONNECTS ━━━━━━━━━━━━━━━━ -->
+  <section id="flow" class="section">
+    <div class="inner">
+      <div class="eyebrow">04 — How it all connects</div>
+      <h2 class="display">One <em>dollar in</em>. Twelve hands.</h2>
+      <p class="section-sub" style="margin-bottom:1.75rem">
+        Follow a dollar from the buyer through the system. Thick red lines = high-volume flows; warm lines = medium; thin grey = small but structural. Every node above the buyer is collecting from every transaction that touches this asset.
+      </p>
+
+      <div class="flow-card">
+        <div class="flow-host" id="flow-diagram"></div>
+        <div class="flow-legend">
+          <span class="l-item"><span class="l-line heavy"></span>Heavy flow ($100k+ per transaction)</span>
+          <span class="l-item"><span class="l-line medium"></span>Medium flow ($10–100k)</span>
+          <span class="l-item"><span class="l-line light"></span>Structural / small</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ━━━━━━━━━━━━━━━━ HISTORY CHARTS ━━━━━━━━━━━━━━━━ -->
   <section id="history" class="section">
-    <div class="section-bar">
-      <h2>Historical context</h2>
-      <p class="section-sub">The structural shifts that produced today's system. Data: FRED, Bank of Canada, CREA, public central-bank disclosures.</p>
-    </div>
+    <div class="eyebrow">04b — Historical context</div>
+    <h2 class="display">The <em>monetary substrate</em> under the price line.</h2>
+    <p class="section-sub" style="margin-bottom:0.5rem">
+      Five charts that explain the chart above. Click an annotation dot to read why that year matters.
+    </p>
     <div class="charts-grid">
       <div class="chart-card">
         <div class="chart-title">US 30-year mortgage rate</div>
-        <div class="chart-sub">1971 → 2026 · Annual average</div>
+        <div class="chart-sub">1971 → 2026 · annual avg · the Volcker peak, the post-COVID low, the 2022 pivot</div>
         <div class="chart-host" id="chart-us-rate"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">US median home price</div>
-        <div class="chart-sub">1970 → 2026 · Nominal USD</div>
-        <div class="chart-host" id="chart-us-price"></div>
-      </div>
-      <div class="chart-card">
         <div class="chart-title">Toronto average home price</div>
-        <div class="chart-sub">1990 → 2026 · Nominal CAD</div>
+        <div class="chart-sub">1990 → 2026 · nominal CAD · 4× in 36 years</div>
         <div class="chart-host" id="chart-toronto-price"></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">US M2 money supply</div>
-        <div class="chart-sub">1971 → 2026 · USD trillions · post-Bretton-Woods</div>
+        <div class="chart-sub">1971 → 2026 · USD trillions · the denominator of every house price</div>
         <div class="chart-host" id="chart-m2"></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Fed MBS holdings</div>
-        <div class="chart-sub">2007 → 2026 · USD trillions · zero pre-crisis</div>
+        <div class="chart-sub">2007 → 2026 · USD trillions · zero pre-2008 · the housing backstop</div>
         <div class="chart-host" id="chart-mbs"></div>
       </div>
-      <div class="chart-card chart-card-bars">
-        <div class="chart-title">Mortgage debt / GDP, 2024</div>
-        <div class="chart-sub">Country exposure to a housing-driven monetary loop</div>
-        <div class="chart-host" id="chart-debtgdp"></div>
-      </div>
     </div>
-    <p class="timeline-link">→ <a href="../data/historical/key-events.md">Read the timeline of key events</a></p>
   </section>
 
-  <!-- ─────────────── Section 5: Bank explorer ─────────────── -->
+  <!-- ━━━━━━━━━━━━━━━━ 05 BANK EXPLORER ━━━━━━━━━━━━━━━━ -->
   <section id="banks" class="section">
-    <div class="section-bar">
-      <h2>Bank explorer</h2>
-      <p class="section-sub">The 33 lenders behind the live counters above. Filter, search, pin to compare side by side.</p>
-    </div>
+    <div class="eyebrow">05 — Bank explorer</div>
+    <h2 class="display">The 33 lenders <em>behind every line</em>.</h2>
+    <p class="section-sub" style="margin-bottom:1.5rem">
+      Filter by structure, country, or revenue mechanism. Pin lenders to compare side by side.
+    </p>
 
     <div class="presets-row">
       <button class="preset-btn active" data-preset="all">All 33</button>
-      <button class="preset-btn" data-preset="state">🏛 State-backed</button>
-      <button class="preset-btn" data-preset="mutual">🤝 Mutuals &amp; coops</button>
-      <button class="preset-btn" data-preset="crossborder">🌍 Cross-border</button>
-      <button class="preset-btn" data-preset="securitizers">📑 Securitizers</button>
-      <button class="preset-btn" data-preset="construction">🏗 Construction financers</button>
+      <button class="preset-btn" data-preset="state">State-backed</button>
+      <button class="preset-btn" data-preset="mutual">Mutuals &amp; coops</button>
+      <button class="preset-btn" data-preset="crossborder">Cross-border</button>
+      <button class="preset-btn" data-preset="securitizers">Securitizers</button>
+      <button class="preset-btn" data-preset="construction">Construction financers</button>
       <button class="preset-btn" data-preset="asia">Asia</button>
       <button class="preset-btn" data-preset="anglo">Anglosphere</button>
     </div>
 
     <div class="manual-filters-row">
       <div class="filter-dropdown" data-key="country">
-        <button class="filter-btn">Country <span class="filter-count"></span> <span class="caret">▾</span></button>
+        <button class="filter-btn">Country <span class="filter-count"></span><span class="caret">▾</span></button>
         <div class="filter-panel" hidden></div>
       </div>
       <div class="filter-dropdown" data-key="type">
-        <button class="filter-btn">Bank type <span class="filter-count"></span> <span class="caret">▾</span></button>
+        <button class="filter-btn">Bank type <span class="filter-count"></span><span class="caret">▾</span></button>
         <div class="filter-panel" hidden></div>
       </div>
       <div class="filter-dropdown" data-key="revenue">
-        <button class="filter-btn">Revenue model <span class="filter-count"></span> <span class="caret">▾</span></button>
+        <button class="filter-btn">Revenue model <span class="filter-count"></span><span class="caret">▾</span></button>
         <div class="filter-panel" hidden></div>
       </div>
       <div class="filter-spacer"></div>
-      <input type="search" id="search" placeholder="🔍 Search lender, city, or country" autocomplete="off" />
+      <input type="search" id="search" placeholder="Search lender, city, country…" autocomplete="off" />
       <span id="count" class="count">– of –</span>
       <button id="reset-filters" class="reset-btn" hidden>Clear</button>
     </div>
@@ -225,24 +292,15 @@
     <div class="modal-backdrop" data-close></div>
     <div class="modal-card modal-wide">
       <button class="modal-close" data-close aria-label="Close">×</button>
-      <h2>Side-by-side comparison</h2>
+      <h2 class="display" style="font-size:1.75rem;margin-bottom:0">Side by side</h2>
       <div id="compare-body"></div>
     </div>
   </div>
 
   <footer id="footer">
     <div class="footer-inner">
-      <p>Read the analysis chapters:
-        <a href="../analysis/01-developers.md">developers</a> ·
-        <a href="../analysis/02-agents.md">agents</a> ·
-        <a href="../analysis/03-banks.md">banks</a> ·
-        <a href="../analysis/04-governments.md">governments</a> ·
-        <a href="../analysis/05-patterns-and-trends.md">trends</a> ·
-        <a href="../analysis/06-financialization.md">financialization</a> ·
-        <a href="../analysis/07-universal-housing-standard.md">housing standard</a> ·
-        <a href="../analysis/08-currency-and-monetary.md">currency &amp; money</a>
-      </p>
-      <p class="muted">Editable data: <code>map/banks.geojson</code> · Historical: <code>data/historical/*.csv</code> · Schema: <a href="SCHEMA.md">SCHEMA.md</a></p>
+      <p>Read the analysis: <a href="../analysis/01-developers.md">developers</a> · <a href="../analysis/02-agents.md">agents</a> · <a href="../analysis/03-banks.md">banks</a> · <a href="../analysis/04-governments.md">governments</a> · <a href="../analysis/06-financialization.md">financialization</a> · <a href="../analysis/07-universal-housing-standard.md">universal housing standard</a> · <a href="../analysis/08-currency-and-monetary.md">currency &amp; money</a></p>
+      <p class="mono" style="opacity:0.55;margin-top:0.5rem">Data: <code>map/banks.geojson</code> · <code>data/historical/*.csv</code> · Schema: <a href="SCHEMA.md">SCHEMA.md</a></p>
     </div>
   </footer>
 
