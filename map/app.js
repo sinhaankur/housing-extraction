@@ -1970,24 +1970,11 @@ function onIndiaUpdate() {
 }
 
 function wireIndia() {
-  if (!document.getElementById('india-section')) return;
-  document.querySelectorAll('.ind-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.ind-btn').forEach(b => b.classList.toggle('active', b === btn));
-      indiaState.view = btn.dataset.view;
-      onIndiaUpdate();
-    });
-  });
-  const slider = document.getElementById('india-year');
-  if (slider) {
-    slider.addEventListener('input', () => {
-      indiaState.yearIdx = +slider.value;
-      document.getElementById('india-year-value').textContent = yearIdxToLabel(indiaState.yearIdx);
-      onIndiaUpdate();
-    });
-  }
-  // Init the map lazily after a short delay to let layout settle.
-  setTimeout(initIndiaMap, 100);
+  // Disabled: the India section is owned by the initIndiaSection() IIFE at the end of this file,
+  // which uses external india-fiscal.json + india-extras.json (real per-year data + governance
+  // footprint: IAS strength, state employees, corruption %, departments). Keeping the
+  // INDIA_STATES + INDIA_NARRATIVES tables above as dead reference data — safe to delete later.
+  return;
 }
 
 /* ────────────────────────── COUNTRY PROFILES ────────────────────────── */
