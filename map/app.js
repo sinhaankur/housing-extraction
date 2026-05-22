@@ -698,8 +698,25 @@ function openWorldDetail(p) {
 
     <div class="india-detail-section-title">Revenue mechanisms</div>
     <div class="card-badges">${(p.revenue_models || []).map(r => `<span class="rev-badge">${esc(nice(r))}</span>`).join('')}</div>
+
+    ${COUNTRY_PROFILES.find(c => c.country === p.country) ? `
+      <a href="#countries" class="world-cross-link" data-country="${esc(p.country)}">See ${esc(p.country)} country profile →</a>
+    ` : ''}
   `;
   document.getElementById('world-back')?.addEventListener('click', clearWorldSelection);
+  panel.querySelector('.world-cross-link')?.addEventListener('click', e => {
+    e.preventDefault();
+    const cn = e.currentTarget.dataset.country;
+    document.getElementById('countries')?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      const card = document.querySelector(`.country-card[data-country="${CSS.escape(cn)}"]`);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.style.boxShadow = '0 0 0 2px var(--pop)';
+        setTimeout(() => { card.style.boxShadow = ''; }, 1800);
+      }
+    }, 450);
+  });
   for (const [n, m] of state.markersByName) {
     const el = m.getElement()?.querySelector('.bank-marker');
     if (el) el.classList.toggle('active', n === p.name);
@@ -788,8 +805,10 @@ function render() {
 
 function renderCards(v) {
   const grid = $('#cards-grid');
+  if (!grid) return; // Section 07 was removed; the world-map sidebar is the only explorer now.
   grid.innerHTML = '';
-  $('#empty-state').hidden = v.length > 0;
+  const empty = $('#empty-state');
+  if (empty) empty.hidden = v.length > 0;
   for (const f of v) {
     const p = f.properties;
     const share = p.mortgage_market_share_pct || 0;
@@ -884,10 +903,14 @@ function renderWorldEmptyState() {
   });
 }
 
-function renderCount(n) { $('#count').textContent = `${n} of ${state.features.length}`; }
+function renderCount(n) {
+  const el = $('#count'); if (el) el.textContent = `${n} of ${state.features.length}`;
+}
 
 function renderActiveChips() {
-  const c = $('#active-filters'); c.innerHTML = '';
+  const c = $('#active-filters');
+  if (!c) return;
+  c.innerHTML = '';
   for (const key of ['country','type','revenue']) {
     for (const val of state.filters[key]) {
       const chip = document.createElement('span');
@@ -910,6 +933,7 @@ function renderActiveChips() {
 function renderFilterButtonStates() {
   for (const key of ['country','type','revenue']) {
     const dd = document.querySelector(`.filter-dropdown[data-key="${key}"]`);
+    if (!dd) continue;
     const btn = dd.querySelector('.filter-btn');
     const cnt = dd.querySelector('.filter-count');
     const n = state.filters[key].size;
@@ -920,7 +944,7 @@ function renderFilterButtonStates() {
 
 function renderResetVisibility() {
   const any = state.filters.country.size || state.filters.type.size || state.filters.revenue.size || state.search;
-  $('#reset-filters').hidden = !any;
+  const r = $('#reset-filters'); if (r) r.hidden = !any;
 }
 
 function buildFilterPanels() {
@@ -931,6 +955,7 @@ function buildFilterPanels() {
 
 function buildPanel(key, values) {
   const panel = document.querySelector(`.filter-dropdown[data-key="${key}"] .filter-panel`);
+  if (!panel) return;
   panel.innerHTML = '';
   for (const v of values) {
     const label = document.createElement('label');
@@ -980,9 +1005,11 @@ function wirePresets() {
 }
 
 function wireSearchAndReset() {
-  $('#search').addEventListener('input', e => { state.search = e.target.value.trim(); render(); });
-  $('#reset-filters').addEventListener('click', () => {
-    applyPreset('all'); state.search = ''; $('#search').value = ''; render();
+  const s = $('#search');
+  if (s) s.addEventListener('input', e => { state.search = e.target.value.trim(); render(); });
+  const r = $('#reset-filters');
+  if (r) r.addEventListener('click', () => {
+    applyPreset('all'); state.search = ''; if (s) s.value = ''; render();
   });
 }
 
@@ -2511,6 +2538,39 @@ window.addEventListener('resize', () => {
   renderCycleEngine();
 });
 
+// Highlight the top-nav link of whichever section is currently most visible.
+function wireScrollSpy() {
+  const links = Array.from(document.querySelectorAll('.nav-links a[href^="#"]'));
+  if (!links.length) return;
+  const sectionById = new Map();
+  for (const a of links) {
+    const id = a.getAttribute('href').slice(1);
+    const sec = document.getElementById(id);
+    if (sec) sectionById.set(id, a);
+  }
+  if (!sectionById.size) return;
+  const observer = new IntersectionObserver(entries => {
+    // Pick the entry with the largest intersection ratio.
+    let best = null;
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      if (!best || e.intersectionRatio > best.intersectionRatio) best = e;
+    }
+    if (!best) return;
+    const id = best.target.id;
+    for (const [otherId, link] of sectionById) {
+      link.classList.toggle('active', otherId === id);
+    }
+  }, {
+    rootMargin: '-30% 0px -55% 0px',
+    threshold: [0, 0.25, 0.5, 0.75, 1],
+  });
+  for (const id of sectionById.keys()) {
+    const sec = document.getElementById(id);
+    if (sec) observer.observe(sec);
+  }
+}
+
 async function load() {
   try {
     const res = await fetch('banks.geojson');
@@ -2528,6 +2588,7 @@ async function load() {
     wireCountries();
     wireIndia();
     wireWorldPanel();
+    wireScrollSpy();
     render();
     updateWorldCount();
     drawExpense();

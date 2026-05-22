@@ -21,7 +21,6 @@
       <a href="#flow">04 How it connects</a>
       <a href="#cycle-engine">05 Engine</a>
       <a href="#countries">06 Countries</a>
-      <a href="#banks">07 Banks</a>
       <a href="../README.md">Analysis ↗</a>
     </div>
   </nav>
@@ -453,52 +452,6 @@
     </div>
 
     <div id="country-grid" class="country-grid"></div>
-  </section>
-
-  <!-- ━━━━━━━━━━━━━━━━ 07 BANK EXPLORER ━━━━━━━━━━━━━━━━ -->
-  <section id="banks" class="section">
-    <div class="eyebrow">07 — Bank explorer</div>
-    <h2 class="display">The 33 lenders <em>behind every line</em>.</h2>
-    <p class="section-sub" style="margin-bottom:1.5rem">
-      Filter by structure, country, or revenue mechanism. Pin lenders to compare side by side.
-    </p>
-
-    <div class="presets-row">
-      <button class="preset-btn active" data-preset="all">All 33</button>
-      <button class="preset-btn" data-preset="state">State-backed</button>
-      <button class="preset-btn" data-preset="mutual">Mutuals &amp; coops</button>
-      <button class="preset-btn" data-preset="crossborder">Cross-border</button>
-      <button class="preset-btn" data-preset="securitizers">Securitizers</button>
-      <button class="preset-btn" data-preset="construction">Construction financers</button>
-      <button class="preset-btn" data-preset="asia">Asia</button>
-      <button class="preset-btn" data-preset="anglo">Anglosphere</button>
-    </div>
-
-    <div class="manual-filters-row">
-      <div class="filter-dropdown" data-key="country">
-        <button class="filter-btn">Country <span class="filter-count"></span><span class="caret">▾</span></button>
-        <div class="filter-panel" hidden></div>
-      </div>
-      <div class="filter-dropdown" data-key="type">
-        <button class="filter-btn">Bank type <span class="filter-count"></span><span class="caret">▾</span></button>
-        <div class="filter-panel" hidden></div>
-      </div>
-      <div class="filter-dropdown" data-key="revenue">
-        <button class="filter-btn">Revenue model <span class="filter-count"></span><span class="caret">▾</span></button>
-        <div class="filter-panel" hidden></div>
-      </div>
-      <div class="filter-spacer"></div>
-      <input type="search" id="search" placeholder="Search lender, city, country…" autocomplete="off" />
-      <span id="count" class="count">– of –</span>
-      <button id="reset-filters" class="reset-btn" hidden>Clear</button>
-    </div>
-    <div id="active-filters" class="active-filters"></div>
-
-    <div id="cards-grid"></div>
-    <div id="empty-state" class="empty-state" hidden>
-      <strong>No lenders match these filters.</strong>
-      <p>Try clearing some, or picking a different preset.</p>
-    </div>
   </section>
 
   <!-- Compare tray -->
