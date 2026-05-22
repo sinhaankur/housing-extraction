@@ -18,7 +18,8 @@
       <a href="#expense">02 What you pay</a>
       <a href="#value-breakdown">03 Value over time</a>
       <a href="#flow">04 How it connects</a>
-      <a href="#banks">05 Banks</a>
+      <a href="#cycle-engine">05 Engine</a>
+      <a href="#banks">06 Banks</a>
       <a href="../README.md">Analysis ↗</a>
     </div>
   </nav>
@@ -151,6 +152,23 @@
       </div>
     </div>
 
+    <!-- 03c — Wage anchor: what the home should cost if pricing tracked income -->
+    <div class="breakdown-card" style="margin-top:1.5rem">
+      <div class="chart-title">If pricing had tracked <em style="font-family:Instrument Serif;font-style:italic">wages</em></div>
+      <div class="chart-sub">Median household income × the international "affordable" threshold (Demographia / UN-Habitat: 3× = affordable, 4× = moderately unaffordable, 5+ = severely unaffordable). Toggle Toronto / US above.</div>
+      <div id="wage-stats" class="wage-stat-row"></div>
+      <div class="chart-host" id="wage-chart" style="height:340px"></div>
+      <div class="flow-legend" style="margin-top:0.5rem">
+        <span class="l-item"><span class="l-line" style="background:oklch(0.65 0.22 25);height:2px;display:inline-block;width:24px"></span> Actual price</span>
+        <span class="l-item"><span class="l-line" style="background:oklch(0.7 0.17 162);height:2px;display:inline-block;width:24px;border-top:1px dashed oklch(0.7 0.17 162);border-bottom:0;background:transparent"></span> Wage-anchored fair price</span>
+        <span class="l-item"><span style="display:inline-block;width:22px;height:10px;background:oklch(0.65 0.22 25 / 0.25);border:1px solid oklch(0.65 0.22 25 / 0.5)"></span> Bank / RE premium</span>
+      </div>
+    </div>
+
+    <p class="section-sub" style="margin:1.5rem 0">
+      The mechanism is simple. When rates fall from 10% to 2%, a household with the same income can borrow <em style="font-family:Instrument Serif;font-style:italic">five times more</em> at the same monthly payment. Banks call it "affordability." It's really pricing power borrowed from the future, then handed to the seller. Add longer amortizations, lower down payments, CMHC-backed risk transfer, and securitization — each one widens the gap between what wages can sustain and what banks will lend against.
+    </p>
+
     <div class="breakdown-explain">
       <div class="bd-cell c-construct">
         <div class="h">Real construction cost</div>
@@ -222,9 +240,107 @@
     </div>
   </section>
 
-  <!-- ━━━━━━━━━━━━━━━━ 05 BANK EXPLORER ━━━━━━━━━━━━━━━━ -->
+  <!-- ━━━━━━━━━━━━━━━━ 05 CYCLE ENGINE ━━━━━━━━━━━━━━━━ -->
+  <section id="cycle-engine" class="section">
+    <div class="eyebrow">05 — Cycle engine</div>
+    <h2 class="display">Watch a single home <em>create value</em> every time it changes hands.</h2>
+    <p class="section-sub" style="margin-bottom:1.5rem">
+      Set the rules. The engine runs one physical unit through N transactions and shows the same trajectory through three lenses: what each buyer experienced, what the banks captured, what happened to the asset. The house never changes. The accounting does.
+    </p>
+
+    <div class="engine-grid">
+      <!-- LEFT: parameters -->
+      <aside class="engine-params">
+        <div class="param-eyebrow">Inputs</div>
+
+        <div class="param">
+          <div class="param-row"><label for="p-price">Initial price</label><span class="param-val" id="v-price">$700,000</span></div>
+          <input type="range" id="p-price" min="200000" max="2000000" step="50000" value="700000" />
+        </div>
+
+        <div class="param">
+          <div class="param-row"><label for="p-appr">Annual appreciation</label><span class="param-val" id="v-appr">4.0%</span></div>
+          <input type="range" id="p-appr" min="0" max="10" step="0.5" value="4" />
+        </div>
+
+        <div class="param">
+          <div class="param-row"><label for="p-hold">Hold period (yrs/cycle)</label><span class="param-val" id="v-hold">5</span></div>
+          <input type="range" id="p-hold" min="2" max="15" step="1" value="5" />
+        </div>
+
+        <div class="param">
+          <div class="param-row"><label for="p-cycles">Number of cycles</label><span class="param-val" id="v-cycles">3</span></div>
+          <input type="range" id="p-cycles" min="1" max="6" step="1" value="3" />
+        </div>
+
+        <div class="param">
+          <div class="param-row"><label for="p-rate">Mortgage rate</label><span class="param-val" id="v-rate">4.5%</span></div>
+          <input type="range" id="p-rate" min="1" max="12" step="0.25" value="4.5" />
+        </div>
+
+        <div class="param">
+          <div class="param-row"><label for="p-down">Down payment</label><span class="param-val" id="v-down">20%</span></div>
+          <input type="range" id="p-down" min="5" max="40" step="1" value="20" />
+        </div>
+
+        <div class="param-eyebrow" style="margin-top:1.5rem">Constants</div>
+        <ul class="param-constants">
+          <li>Mortgage term · 30 yr fixed</li>
+          <li>Inflation · 2.5%/yr (for real-terms calc)</li>
+          <li>Realtor commission · 5% of resale</li>
+          <li>Land transfer tax · 3% (Toronto)</li>
+          <li>Property tax · 0.65%/yr · Maintenance · 1%/yr</li>
+        </ul>
+
+        <button class="primary-btn" id="engine-reset" style="margin-top:1rem;width:100%;background:var(--muted);color:var(--foreground)">Reset to defaults</button>
+      </aside>
+
+      <!-- RIGHT: three perspective cards -->
+      <div class="engine-output">
+        <div class="engine-lenses">
+          <article class="lens lens-user">
+            <header><span class="lens-tag">User flow</span><span class="lens-sub">across all buyers</span></header>
+            <div class="lens-headline" id="lens-user-headline">–</div>
+            <div class="lens-meta" id="lens-user-meta"></div>
+            <ul class="lens-rows" id="lens-user-rows"></ul>
+          </article>
+
+          <article class="lens lens-bank">
+            <header><span class="lens-tag">Bank flow</span><span class="lens-sub">across all mortgages</span></header>
+            <div class="lens-headline" id="lens-bank-headline">–</div>
+            <div class="lens-meta" id="lens-bank-meta"></div>
+            <ul class="lens-rows" id="lens-bank-rows"></ul>
+          </article>
+
+          <article class="lens lens-market">
+            <header><span class="lens-tag">Market</span><span class="lens-sub">the asset itself</span></header>
+            <div class="lens-headline" id="lens-market-headline">–</div>
+            <div class="lens-meta" id="lens-market-meta"></div>
+            <ul class="lens-rows" id="lens-market-rows"></ul>
+          </article>
+        </div>
+
+        <div class="engine-chart-card">
+          <div class="chart-title">Per-cycle flows</div>
+          <div class="chart-sub">Each bar is one cycle. Stacked: who got what during that buyer's hold period.</div>
+          <div class="chart-host" id="cycle-chart" style="height:280px"></div>
+          <div class="flow-legend" style="margin-top:0.5rem">
+            <span class="l-item"><span style="display:inline-block;width:12px;height:10px;background:oklch(0.4 0.08 200)"></span> Equity (buyer kept)</span>
+            <span class="l-item"><span style="display:inline-block;width:12px;height:10px;background:oklch(0.65 0.22 25)"></span> Bank interest</span>
+            <span class="l-item"><span style="display:inline-block;width:12px;height:10px;background:oklch(0.7 0.18 70)"></span> Govt taxes</span>
+            <span class="l-item"><span style="display:inline-block;width:12px;height:10px;background:oklch(0.55 0.12 160)"></span> Realtor commission</span>
+            <span class="l-item"><span style="display:inline-block;width:12px;height:10px;background:oklch(0.5 0.05 0)"></span> Maintenance + closing</span>
+          </div>
+        </div>
+
+        <div class="engine-counterfactual" id="engine-counterfactual"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ━━━━━━━━━━━━━━━━ 06 BANK EXPLORER ━━━━━━━━━━━━━━━━ -->
   <section id="banks" class="section">
-    <div class="eyebrow">05 — Bank explorer</div>
+    <div class="eyebrow">06 — Bank explorer</div>
     <h2 class="display">The 33 lenders <em>behind every line</em>.</h2>
     <p class="section-sub" style="margin-bottom:1.5rem">
       Filter by structure, country, or revenue mechanism. Pin lenders to compare side by side.

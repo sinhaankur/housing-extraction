@@ -96,6 +96,41 @@ const TORONTO_ANNUAL = [
   { year:2026, price:1015, event:'Soft market. Affordability still extreme.' },
 ];
 
+// Wage anchor: median household income vs actual home price. The "fair" price is
+// income × an internationally-recognized affordable multiplier (Demographia: 3× = affordable,
+// 4× = moderately unaffordable, 5+ = severely unaffordable). The shaded gap is what
+// banks + real estate added on top of what wages can sustain.
+const WAGE_DATA = {
+  toronto: {
+    label: 'Toronto · CAD',
+    units: 'k',
+    multiplier: 4,
+    multiplierLabel: '4× income (affordable threshold)',
+    income: [
+      [1990,45],[1995,49],[2000,57],[2005,64],[2010,71],[2015,79],
+      [2020,92],[2021,93],[2022,95],[2023,97],[2024,98],[2025,99],[2026,100],
+    ],
+    price: [
+      [1990,255],[1995,203],[2000,243],[2005,336],[2010,432],[2015,622],
+      [2020,929],[2021,1095],[2022,1339],[2023,1126],[2024,1063],[2025,1040],[2026,1015],
+    ],
+  },
+  us: {
+    label: 'US · USD',
+    units: 'k',
+    multiplier: 3,
+    multiplierLabel: '3× income (affordable threshold)',
+    income: [
+      [1990,30],[1995,35],[2000,42],[2005,46],[2010,50],[2015,56],
+      [2020,67.5],[2021,71],[2022,74],[2023,77],[2024,80],[2025,82],[2026,83],
+    ],
+    price: [
+      [1990,79],[1995,99],[2000,119],[2005,232],[2010,172],[2015,223],
+      [2020,329],[2021,355],[2022,429],[2023,418],[2024,420],[2025,425],[2026,428],
+    ],
+  },
+};
+
 // Historical lines.
 const HIST = {
   usRate: [[1971,7.54],[1981,16.63],[1985,12.42],[1990,10.13],[1995,7.93],[2000,8.06],[2005,5.87],[2008,6.03],[2009,5.04],[2012,3.66],[2015,3.85],[2020,3.11],[2021,2.96],[2022,5.34],[2023,6.81],[2024,6.72],[2025,6.65],[2026,6.63]],
@@ -723,7 +758,117 @@ function wireValueStack() {
     b.classList.add('active');
     valueStackCity = b.dataset.city;
     drawValueStack();
+    drawWageGap();
   }));
+}
+
+/* ────────────────────────── WAGE ANCHOR (price vs income-anchored fair price) ────────────────────────── */
+
+function drawWageGap() {
+  const host = $('#wage-chart');
+  if (!host) return;
+  const W = host.clientWidth || 900;
+  const H = host.clientHeight || 340;
+  const pad = { t: 30, r: 30, b: 38, l: 56 };
+  const innerW = W - pad.l - pad.r;
+  const innerH = H - pad.t - pad.b;
+
+  const d = WAGE_DATA[valueStackCity];
+  const incomeMap = new Map(d.income);
+  const points = d.price.map(([yr, p]) => {
+    // For years that have no income point, interpolate linearly between neighbors.
+    let income = incomeMap.get(yr);
+    if (income == null) {
+      const before = d.income.filter(([y]) => y < yr).pop();
+      const after  = d.income.find(([y]) => y > yr);
+      if (before && after) {
+        const frac = (yr - before[0]) / (after[0] - before[0]);
+        income = before[1] + (after[1] - before[1]) * frac;
+      } else {
+        income = (before || after)[1];
+      }
+    }
+    return { year: yr, actual: p, income, fair: income * d.multiplier };
+  });
+
+  const xMin = points[0].year, xMax = points[points.length-1].year;
+  const yMax = Math.max(...points.map(p => p.actual)) * 1.05;
+  const x = v => pad.l + ((v - xMin) / (xMax - xMin)) * innerW;
+  const y = v => pad.t + innerH - (v / yMax) * innerH;
+
+  const actualPath = points.map((p,i) => (i ? 'L' : 'M') + x(p.year) + ',' + y(p.actual)).join(' ');
+  const fairPath   = points.map((p,i) => (i ? 'L' : 'M') + x(p.year) + ',' + y(p.fair)).join(' ');
+  // Shaded gap between fair and actual (clipped to whichever is on top — here actual ≥ fair)
+  const gapPath = [
+    ...points.map((p,i) => `${i===0?'M':'L'}${x(p.year)},${y(p.actual)}`),
+    ...points.slice().reverse().map(p => `L${x(p.year)},${y(p.fair)}`),
+    'Z',
+  ].join(' ');
+
+  const yTicks = 5;
+  const yTickVals = Array.from({length: yTicks+1}, (_,i) => yMax * i / yTicks);
+  const xTickStep = 5;
+  const xTickVals = [];
+  for (let t = xMin; t <= xMax; t += xTickStep) xTickVals.push(t);
+  if (xTickVals[xTickVals.length-1] !== xMax) xTickVals.push(xMax);
+
+  // Latest values for the stats row
+  const last = points[points.length-1];
+  const gap = last.actual - last.fair;
+  const gapPct = (gap / last.fair) * 100;
+  const pir = last.actual / last.income;
+
+  // Update the stats row outside the SVG
+  const stats = $('#wage-stats');
+  if (stats) {
+    stats.innerHTML = `
+      <div class="wage-stat">
+        <div class="label">Wage-anchored fair price (${last.year})</div>
+        <div class="value good">$${Math.round(last.fair)}${d.units}</div>
+        <div class="caption">median income $${Math.round(last.income)}${d.units} × ${d.multiplier}</div>
+      </div>
+      <div class="wage-stat">
+        <div class="label">Actual price (${last.year})</div>
+        <div class="value bad">$${Math.round(last.actual).toLocaleString()}${d.units}</div>
+        <div class="caption">price-to-income ratio: ${pir.toFixed(1)}×</div>
+      </div>
+      <div class="wage-stat">
+        <div class="label">Bank / RE premium</div>
+        <div class="value bad">+$${Math.round(gap)}${d.units}</div>
+        <div class="caption">${gapPct.toFixed(0)}% above wage-anchored value</div>
+      </div>
+    `;
+  }
+
+  host.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+      <g class="axis">
+        ${yTickVals.map(v => `
+          <line class="tick-grid" x1="${pad.l}" x2="${pad.l+innerW}" y1="${y(v)}" y2="${y(v)}" />
+          <text x="${pad.l-6}" y="${y(v)+3}" text-anchor="end">$${Math.round(v)}${d.units}</text>
+        `).join('')}
+        ${xTickVals.map(v => `<text x="${x(v)}" y="${pad.t+innerH+18}" text-anchor="middle">${v}</text>`).join('')}
+        <line x1="${pad.l}" x2="${pad.l+innerW}" y1="${pad.t+innerH}" y2="${pad.t+innerH}" />
+      </g>
+      <path d="${gapPath}" class="wage-gap-area" />
+      <path d="${fairPath}" class="wage-fair-line" />
+      <path d="${actualPath}" class="wage-actual-line" />
+      <!-- Labels at the right edge -->
+      <text x="${x(last.year) - 8}" y="${y(last.actual) - 8}" text-anchor="end"
+            style="font-family:Geist Mono,monospace;font-size:10px;fill:oklch(0.65 0.22 25);letter-spacing:0.04em">
+        ACTUAL · $${Math.round(last.actual)}${d.units}
+      </text>
+      <text x="${x(last.year) - 8}" y="${y(last.fair) + 14}" text-anchor="end"
+            style="font-family:Geist Mono,monospace;font-size:10px;fill:oklch(0.7 0.17 162);letter-spacing:0.04em">
+        FAIR · $${Math.round(last.fair)}${d.units}
+      </text>
+      <!-- Subtitle -->
+      <text x="${pad.l}" y="${pad.t - 10}"
+            style="font-family:Geist Mono,monospace;font-size:10.5px;fill:var(--muted-foreground);letter-spacing:0.06em;text-transform:uppercase">
+        ${esc(d.label)} · ${esc(d.multiplierLabel)}
+      </text>
+    </svg>
+  `;
 }
 
 /* ────────────────────────── HOW-IT-CONNECTS FLOW DIAGRAM ────────────────────────── */
@@ -807,6 +952,323 @@ function drawFlow() {
   `;
 }
 
+/* ────────────────────────── CYCLE ENGINE ────────────────────────── */
+
+const CYCLE_DEFAULTS = {
+  price: 700000,
+  appr: 4,      // % annual appreciation
+  hold: 5,      // years per cycle
+  cycles: 3,
+  rate: 4.5,    // mortgage rate %
+  down: 20,     // %
+};
+const CYCLE_CONST = {
+  termYears: 30,
+  inflation: 2.5,
+  commission: 5,      // %
+  ltt: 3,             // % land transfer tax
+  propTax: 0.65,      // % annual
+  maintenance: 1,     // % annual
+  closing: 3000,      // fixed $
+};
+
+const cycleState = { ...CYCLE_DEFAULTS };
+
+// Standard mortgage payment formula
+function pmt(principal, annualRatePct, termYears) {
+  const r = (annualRatePct / 100) / 12;
+  const n = termYears * 12;
+  if (r === 0) return principal / n;
+  return principal * r / (1 - Math.pow(1 + r, -n));
+}
+
+// Outstanding balance after m monthly payments
+function remainingBalance(principal, annualRatePct, termYears, monthsHeld) {
+  const r = (annualRatePct / 100) / 12;
+  const n = termYears * 12;
+  const m = monthsHeld;
+  if (r === 0) return principal * (1 - m/n);
+  return principal * (Math.pow(1+r, n) - Math.pow(1+r, m)) / (Math.pow(1+r, n) - 1);
+}
+
+function runCycleEngine(params = cycleState) {
+  const C = CYCLE_CONST;
+  const cycles = [];
+  let currentPrice = params.price;
+
+  for (let k = 0; k < params.cycles; k++) {
+    const purchasePrice = currentPrice;
+    const down = purchasePrice * params.down / 100;
+    const mortgage = purchasePrice - down;
+    const ltt = purchasePrice * C.ltt / 100;
+    const monthlyPmt = pmt(mortgage, params.rate, C.termYears);
+    const months = params.hold * 12;
+
+    const totalPayments = monthlyPmt * months;
+    const remaining = remainingBalance(mortgage, params.rate, C.termYears, months);
+    const principalPaid = mortgage - remaining;
+    const interestPaid = totalPayments - principalPaid;
+
+    const propTaxTotal = purchasePrice * (C.propTax/100) * params.hold;
+    const maintTotal = purchasePrice * (C.maintenance/100) * params.hold;
+
+    const resalePrice = purchasePrice * Math.pow(1 + params.appr/100, params.hold);
+    const commission = resalePrice * C.commission / 100;
+    const saleProceedsNet = resalePrice - commission;
+    const cashAtClose = saleProceedsNet - remaining;
+
+    // Buyer's outlay over the hold:
+    const totalOutflow = down + totalPayments + ltt + propTaxTotal + maintTotal + C.closing;
+    const totalInflow = cashAtClose;
+    const nominalNet = totalInflow - totalOutflow;
+
+    // Real (inflation-adjusted) net at end of cycle
+    const inflFactor = Math.pow(1 + C.inflation/100, params.hold);
+    const realNet = nominalNet / inflFactor;
+
+    cycles.push({
+      k: k + 1,
+      purchasePrice,
+      resalePrice,
+      down,
+      mortgage,
+      monthlyPmt,
+      totalPayments,
+      interestPaid,
+      principalPaid,
+      remaining,
+      ltt,
+      propTaxTotal,
+      maintTotal,
+      commission,
+      cashAtClose,
+      totalOutflow,
+      totalInflow,
+      nominalNet,
+      realNet,
+      equityKept: principalPaid + (resalePrice - purchasePrice),  // a buyer's share that survives
+    });
+
+    currentPrice = resalePrice;
+  }
+
+  // Aggregate across cycles
+  const totalInterest = cycles.reduce((s,c) => s + c.interestPaid, 0);
+  const totalCommissions = cycles.reduce((s,c) => s + c.commission, 0);
+  const totalLTT = cycles.reduce((s,c) => s + c.ltt, 0);
+  const totalPropTax = cycles.reduce((s,c) => s + c.propTaxTotal, 0);
+  const totalMaint = cycles.reduce((s,c) => s + c.maintTotal, 0);
+  const totalNominalNet = cycles.reduce((s,c) => s + c.nominalNet, 0);
+  const totalRealNet = cycles.reduce((s,c) => s + c.realNet, 0);
+
+  const startPrice = params.price;
+  const endPrice = cycles[cycles.length - 1].resalePrice;
+  const totalYears = params.hold * params.cycles;
+  const realEnd = endPrice / Math.pow(1 + C.inflation/100, totalYears);
+  const totalExtraction = totalInterest + totalCommissions + totalLTT + totalPropTax + totalMaint;
+
+  // Counterfactual: same property held for same total years by ONE buyer
+  const singleHoldMortgage = params.price * (1 - params.down/100);
+  const singleHoldPmt = pmt(singleHoldMortgage, params.rate, C.termYears);
+  const singleHoldMonths = Math.min(totalYears * 12, C.termYears * 12);
+  const singleHoldRemain = remainingBalance(singleHoldMortgage, params.rate, C.termYears, singleHoldMonths);
+  const singleHoldPrincipalPaid = singleHoldMortgage - singleHoldRemain;
+  const singleHoldInterest = singleHoldPmt * singleHoldMonths - singleHoldPrincipalPaid;
+  // Single hold: only 1 LTT, 1 commission at the end (if sold)
+  const singleHoldCommission = endPrice * C.commission / 100;
+  const singleHoldLTT = params.price * C.ltt / 100;
+  const singleHoldExtraction = singleHoldInterest + singleHoldCommission + singleHoldLTT
+                                + params.price * (C.propTax/100) * totalYears
+                                + params.price * (C.maintenance/100) * totalYears;
+  const cyclePremium = totalExtraction - singleHoldExtraction;
+
+  return {
+    cycles, params,
+    totals: {
+      totalInterest, totalCommissions, totalLTT, totalPropTax, totalMaint,
+      totalNominalNet, totalRealNet, totalExtraction,
+      startPrice, endPrice, totalYears, realEnd,
+      singleHoldInterest, singleHoldExtraction, cyclePremium,
+    },
+  };
+}
+
+const fmtUSD = n => '$' + Math.round(n).toLocaleString();
+const fmtUSDShort = n => {
+  const abs = Math.abs(n);
+  if (abs >= 1e6) return (n < 0 ? '-' : '') + '$' + Math.abs(n/1e6).toFixed(2) + 'M';
+  if (abs >= 1e3) return (n < 0 ? '-' : '') + '$' + Math.round(Math.abs(n)/1e3) + 'k';
+  return (n < 0 ? '-' : '') + '$' + Math.round(Math.abs(n));
+};
+
+function renderCycleEngine() {
+  const r = runCycleEngine(cycleState);
+
+  // ── USER LENS ──
+  const avgRealNet = r.totals.totalRealNet / r.params.cycles;
+  const userVerdict = r.totals.totalRealNet > 0
+    ? `<span style="color:oklch(0.78 0.16 162)">Net positive</span>`
+    : `<span style="color:oklch(0.72 0.22 25)">Net negative</span>`;
+  $('#lens-user-headline').innerHTML = `${fmtUSDShort(r.totals.totalRealNet)} <span style="font-size:0.5em;color:var(--muted-foreground);font-weight:400">total real net, all buyers</span>`;
+  $('#lens-user-meta').innerHTML = `${userVerdict} · ${fmtUSDShort(avgRealNet)} avg per cycle, in today's dollars`;
+  $('#lens-user-rows').innerHTML = r.cycles.map(c => `
+    <li>
+      <span class="row-l">Cycle ${c.k} buyer</span>
+      <span class="row-v ${c.realNet >= 0 ? 'pos' : 'neg'}">${fmtUSDShort(c.realNet)}</span>
+      <span class="row-sub">paid ${fmtUSDShort(c.totalOutflow)} · got ${fmtUSDShort(c.totalInflow)} (real)</span>
+    </li>
+  `).join('');
+
+  // ── BANK LENS ──
+  $('#lens-bank-headline').innerHTML = `${fmtUSDShort(r.totals.totalInterest)} <span style="font-size:0.5em;color:var(--muted-foreground);font-weight:400">total interest across ${r.params.cycles} mortgages</span>`;
+  const pctOfPrice = (r.totals.totalInterest / r.totals.endPrice * 100).toFixed(0);
+  $('#lens-bank-meta').innerHTML = `Each cycle resets the amortization clock. Frontloaded interest restarts. <strong>${pctOfPrice}%</strong> of the final price went to banks.`;
+  $('#lens-bank-rows').innerHTML = r.cycles.map(c => `
+    <li>
+      <span class="row-l">Cycle ${c.k}</span>
+      <span class="row-v">${fmtUSDShort(c.interestPaid)}</span>
+      <span class="row-sub">${(c.interestPaid / c.totalPayments * 100).toFixed(0)}% of buyer's payments · principal: ${fmtUSDShort(c.principalPaid)}</span>
+    </li>
+  `).join('');
+
+  // ── MARKET LENS ──
+  const nominalGrowthPct = ((r.totals.endPrice / r.totals.startPrice) - 1) * 100;
+  const realGrowthPct = ((r.totals.realEnd / r.totals.startPrice) - 1) * 100;
+  $('#lens-market-headline').innerHTML = `${fmtUSDShort(r.totals.startPrice)} → ${fmtUSDShort(r.totals.endPrice)}`;
+  $('#lens-market-meta').innerHTML = `Sticker grew ${nominalGrowthPct.toFixed(0)}% nominal · <strong>${realGrowthPct.toFixed(0)}%</strong> real (after ${CYCLE_CONST.inflation}% inflation × ${r.totals.totalYears}yr)`;
+  $('#lens-market-rows').innerHTML = `
+    <li><span class="row-l">Total extraction layer</span><span class="row-v">${fmtUSDShort(r.totals.totalExtraction)}</span>
+      <span class="row-sub">interest + commissions + LTT + property tax + maintenance, all cycles</span></li>
+    <li><span class="row-l">vs. real appreciation</span><span class="row-v">${fmtUSDShort(r.totals.endPrice - r.totals.startPrice)}</span>
+      <span class="row-sub">nominal price growth across the chain</span></li>
+    <li><span class="row-l">Real value change</span><span class="row-v ${realGrowthPct >= 0 ? 'pos' : 'neg'}">${fmtUSDShort(r.totals.realEnd - r.totals.startPrice)}</span>
+      <span class="row-sub">in today's dollars · what actually grew</span></li>
+  `;
+
+  // ── COUNTERFACTUAL: cycle premium ──
+  $('#engine-counterfactual').innerHTML = `
+    <div class="cf-card">
+      <div class="cf-eyebrow">Counterfactual · same property, one buyer, full ${r.totals.totalYears} years</div>
+      <div class="cf-grid">
+        <div class="cf-cell">
+          <div class="cf-l">Extraction with ${r.params.cycles} cycles</div>
+          <div class="cf-v cf-bad">${fmtUSDShort(r.totals.totalExtraction)}</div>
+        </div>
+        <div class="cf-cell">
+          <div class="cf-l">Extraction with 0 cycles</div>
+          <div class="cf-v cf-good">${fmtUSDShort(r.totals.singleHoldExtraction)}</div>
+        </div>
+        <div class="cf-cell">
+          <div class="cf-l">Cycle premium</div>
+          <div class="cf-v cf-bad">+${fmtUSDShort(r.totals.cyclePremium)}</div>
+          <div class="cf-sub">paid to the system because the property changed hands</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // ── PER-CYCLE STACKED CHART ──
+  drawCycleChart(r);
+}
+
+function drawCycleChart(result) {
+  const host = $('#cycle-chart');
+  if (!host) return;
+  const W = host.clientWidth || 700;
+  const H = host.clientHeight || 280;
+  const pad = { t: 16, r: 16, b: 28, l: 60 };
+  const innerW = W - pad.l - pad.r;
+  const innerH = H - pad.t - pad.b;
+
+  const cycles = result.cycles;
+  const segments = cycles.map(c => ({
+    k: c.k,
+    equity: Math.max(0, c.nominalNet), // buyer's net cash kept (if positive)
+    interest: c.interestPaid,
+    taxes: c.ltt + c.propTaxTotal,
+    commission: c.commission,
+    maint: c.maintTotal + CYCLE_CONST.closing,
+  }));
+
+  const totals = segments.map(s => s.equity + s.interest + s.taxes + s.commission + s.maint);
+  const max = Math.max(...totals) * 1.08;
+  const barW = innerW / cycles.length * 0.55;
+  const colors = {
+    equity: 'oklch(0.4 0.08 200)',
+    interest: 'oklch(0.65 0.22 25)',
+    taxes: 'oklch(0.7 0.18 70)',
+    commission: 'oklch(0.55 0.12 160)',
+    maint: 'oklch(0.5 0.05 0)',
+  };
+  const y = v => pad.t + innerH - (v / max) * innerH;
+  const cx = i => pad.l + innerW * (i + 0.5) / cycles.length;
+
+  const yTicks = 4;
+  const yTickVals = Array.from({length: yTicks+1}, (_,i) => max * i / yTicks);
+
+  let svg = `
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+      <g class="axis">
+        ${yTickVals.map(v => `
+          <line class="tick-grid" x1="${pad.l}" x2="${pad.l+innerW}" y1="${y(v)}" y2="${y(v)}" />
+          <text x="${pad.l-6}" y="${y(v)+3}" text-anchor="end">${fmtUSDShort(v).replace('$','$')}</text>
+        `).join('')}
+      </g>
+  `;
+  segments.forEach((s, i) => {
+    const stack = ['interest','taxes','commission','maint','equity'];
+    let yCursor = pad.t + innerH;
+    for (const k of stack) {
+      const v = s[k];
+      if (v <= 0) continue;
+      const h = (v / max) * innerH;
+      yCursor -= h;
+      svg += `<rect x="${cx(i) - barW/2}" y="${yCursor}" width="${barW}" height="${h}" fill="${colors[k]}" stroke="oklch(0.145 0 0)" stroke-width="0.5"/>`;
+    }
+    svg += `<text x="${cx(i)}" y="${pad.t+innerH+18}" text-anchor="middle" style="fill:var(--muted-foreground);font-family:Geist Mono;font-size:10.5px;letter-spacing:0.03em">CYCLE ${s.k}</text>`;
+    svg += `<text x="${cx(i)}" y="${y(totals[i]) - 6}" text-anchor="middle" style="fill:var(--foreground);font-family:Geist Mono;font-size:10.5px">${fmtUSDShort(totals[i])}</text>`;
+  });
+  svg += '</svg>';
+  host.innerHTML = svg;
+}
+
+function wireCycleEngine() {
+  const wire = (id, key, fmt) => {
+    const input = $('#' + id);
+    if (!input) return;
+    const valEl = $('#v-' + id.split('-')[1]);
+    input.addEventListener('input', () => {
+      const v = parseFloat(input.value);
+      cycleState[key] = v;
+      if (valEl) valEl.textContent = fmt(v);
+      renderCycleEngine();
+    });
+  };
+  wire('p-price',  'price',  v => '$' + v.toLocaleString());
+  wire('p-appr',   'appr',   v => v.toFixed(1) + '%');
+  wire('p-hold',   'hold',   v => v + (v === 1 ? ' yr' : ' yrs'));
+  wire('p-cycles', 'cycles', v => v);
+  wire('p-rate',   'rate',   v => v.toFixed(2) + '%');
+  wire('p-down',   'down',   v => v + '%');
+
+  $('#engine-reset').addEventListener('click', () => {
+    Object.assign(cycleState, CYCLE_DEFAULTS);
+    $('#p-price').value = CYCLE_DEFAULTS.price;
+    $('#p-appr').value  = CYCLE_DEFAULTS.appr;
+    $('#p-hold').value  = CYCLE_DEFAULTS.hold;
+    $('#p-cycles').value = CYCLE_DEFAULTS.cycles;
+    $('#p-rate').value  = CYCLE_DEFAULTS.rate;
+    $('#p-down').value  = CYCLE_DEFAULTS.down;
+    $('#v-price').textContent  = '$' + CYCLE_DEFAULTS.price.toLocaleString();
+    $('#v-appr').textContent   = CYCLE_DEFAULTS.appr.toFixed(1) + '%';
+    $('#v-hold').textContent   = CYCLE_DEFAULTS.hold + ' yrs';
+    $('#v-cycles').textContent = CYCLE_DEFAULTS.cycles;
+    $('#v-rate').textContent   = CYCLE_DEFAULTS.rate.toFixed(2) + '%';
+    $('#v-down').textContent   = CYCLE_DEFAULTS.down + '%';
+    renderCycleEngine();
+  });
+}
+
 /* ────────────────────────── HISTORICAL LINE CHARTS ────────────────────────── */
 
 function lineChart(hostId, series, opts = {}) {
@@ -867,8 +1329,10 @@ window.addEventListener('resize', () => {
   drawExpense();
   drawGranularPrice();
   drawValueStack();
+  drawWageGap();
   drawFlow();
   drawHistoricalCharts();
+  renderCycleEngine();
 });
 
 async function load() {
@@ -884,12 +1348,15 @@ async function load() {
     wireModalClose();
     wireCompareTray();
     wireValueStack();
+    wireCycleEngine();
     render();
     drawExpense();
     drawGranularPrice();
     drawValueStack();
+    drawWageGap();
     drawFlow();
     drawHistoricalCharts();
+    renderCycleEngine();
   } catch (err) {
     console.error(err);
     $('#empty-state').hidden = false;
