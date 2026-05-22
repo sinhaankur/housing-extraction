@@ -188,6 +188,252 @@ const FLOW_EDGES = [
   ['cb',        'bank',         'heavy',  'reserves → lending',      0.5,  'feedback-up'],
 ];
 
+// Country profiles — strength + weakness + petrodollar exposure for each major market.
+// Petrodollar exposure: 'issuer' (US), 'high' (Anglosphere + HK), 'medium' (EU + emerging),
+// 'low' (monetarily sovereign — Japan, India, Switzerland).
+const COUNTRY_PROFILES = [
+  {
+    country: 'United States', flag: '🇺🇸',
+    role: 'Reserve currency issuer',
+    petrodollar: 'issuer',
+    cpi: 67,
+    mortgageSystem: '30-yr fixed · originate-to-distribute via Fannie/Freddie',
+    strength: 'Unlimited credit creation in own currency. Can sustain deficits as long as global USD demand holds. Fed has the deepest backstop toolkit.',
+    weakness: 'Reserve status forces exporting inflation through housing/asset bubbles. Each shock recurses into housing prices. Wealth gap widens via asset ownership concentration.',
+    factors: {
+      corruption: 'Formal CPI 67 (moderate). Real vulnerability: campaign finance + revolving-door lobbying, which shapes housing tax preferences (mortgage interest deduction, 1031 exchange, REIT carve-outs) more than direct bribery does.',
+      geopolitics: 'Issuer of the reserve currency means foreign-policy moves recurse into the housing system. Sanctions on Russia (2022) → frozen reserves → BRICS settlement experiments → erosion of petrodollar = a slow-moving threat to the US housing-finance subsidy model.',
+      demographics: '~0.4%/yr population growth (slowing). Millennial household formation surged 2018-2023 then stalled with rates. Aging boomers will release housing supply gradually 2030+.',
+      trade: 'Persistent goods deficit, services + capital surplus. Strong USD attracts inflows that bid up real estate even when economy is weak elsewhere.',
+    },
+  },
+  {
+    country: 'Canada', flag: '🇨🇦',
+    role: 'Anglo-resource, USD-coupled',
+    petrodollar: 'high',
+    cpi: 76,
+    mortgageSystem: '5-yr fixed renewals · CMHC insured',
+    strength: 'CMHC ringfences default risk from banks (state absorbs it). Big 6 bank concentration = stable system. Resource exports cushion currency.',
+    weakness: '79% household mortgage debt/GDP. Renewal-reset extracts maximally. Foreign capital flows from US monetary policy hit fastest here.',
+    factors: {
+      corruption: 'Formal CPI 76 (clean). Real vulnerability: BC + Ontario absorbed major proceeds-of-crime laundering through real estate 2010-2018; 2017+ FBT + UBO registry reforms only partial fixes.',
+      geopolitics: 'Tight US alignment = monetary spillover lands here first. Trade exposure to China (potash, lumber, energy) makes housing demand cyclically tied to commodity wars.',
+      demographics: '~1%/yr population growth, immigration-led (500k+/yr target through 2026). Massive housing demand pressure concentrated in Toronto + Vancouver.',
+      trade: 'Resource exporter; CAD strengthens on commodity cycles. Commodity booms inflate housing — the Calgary/Edmonton pattern but also Toronto via secondary spend.',
+    },
+  },
+  {
+    country: 'United Kingdom', flag: '🇬🇧',
+    role: 'Anglo, deep capital markets',
+    petrodollar: 'high',
+    cpi: 71,
+    mortgageSystem: 'Short fix (2-5yr) renewals',
+    strength: 'Building societies (mutuals) preserve competition. Pension-coupled property gives institutional discipline. Help-to-Buy provided pathway.',
+    weakness: 'Short-fix renewals maximize bank extraction. London is the prime global conduit for foreign capital absorption.',
+    factors: {
+      corruption: 'Formal CPI 71. Major vulnerability: "London laundromat" — UK shell companies and prime central London property historically the global preferred destination for proceeds from corruption (post-Soviet wealth, Gulf, China). 2022+ Russia sanctions exposed and partly froze these channels.',
+      geopolitics: 'Post-Brexit, less aligned with EU financial-supervisory regime → loosened scrutiny. Strong defense + intelligence alignment with US keeps UK reserve-asset privilege intact.',
+      demographics: 'Population growth ~0.4%/yr, slowing. London household formation cooling. South-east commuter belt under pressure.',
+      trade: 'Persistent current-account deficit financed by capital inflows — much of which lands in real estate (prime London).',
+    },
+  },
+  {
+    country: 'Australia', flag: '🇦🇺',
+    role: 'Anglo-resource, China-coupled',
+    petrodollar: 'high',
+    cpi: 73,
+    mortgageSystem: 'Variable + interest-only',
+    strength: 'Compulsory superannuation (~11% of wages) builds household wealth outside housing. Resource exports diversify revenue base.',
+    weakness: '93% household debt/GDP — highest in developed world. Variable rates pass shock to borrower immediately. Big 4 oligopoly limits competition.',
+    factors: {
+      corruption: 'Formal CPI 73 — relatively clean. Sydney + Melbourne were the secondary destinations after London/Vancouver for Asian-source capital seeking exit; FIRB rules and 2017 anti-money-laundering reforms tightened this.',
+      geopolitics: 'AUKUS pact (2021) reinforced US alignment. China trade relationship deteriorated 2018-2023, recovered partially; iron ore + LNG keep dependency mutual. China property buying retreated 2017+.',
+      demographics: 'High immigration-led growth (~1.5%/yr). Sydney + Melbourne demand outstrips supply structurally.',
+      trade: 'Mining commodities + agriculture. AUD highly correlated with iron-ore price → housing demand spikes during commodity booms.',
+    },
+  },
+  {
+    country: 'New Zealand', flag: '🇳🇿',
+    role: 'Anglo small-market',
+    petrodollar: 'high',
+    cpi: 83,
+    mortgageSystem: '1-5yr fixed renewals',
+    strength: 'Small population means policy can be agile. Foreign-buyer ban (2018) showed political will to act.',
+    weakness: 'Among the most unaffordable housing in the world (Auckland PIR ~10). Heavily exposed to dairy export cycles + RBNZ policy.',
+    factors: {
+      corruption: 'CPI 83 — cleanest in this comparison set. Tightly regulated banking. Real estate transparency is high; corruption channels are minimal.',
+      geopolitics: 'Five Eyes member but more economically tied to China (~30% of exports). Walks careful line. 2018 foreign-buyer ban was geopolitically symbolic as much as practical.',
+      demographics: '~0.5%/yr population growth, immigration-led. Auckland is the bottleneck.',
+      trade: 'Dairy + meat + tourism. NZD is a small high-beta currency that absorbs Asia-Pacific shocks disproportionately.',
+    },
+  },
+  {
+    country: 'Germany', flag: '🇩🇪',
+    role: 'EU manufacturing core',
+    petrodollar: 'medium',
+    cpi: 78,
+    mortgageSystem: 'Long-fixed 10-15yr · Pfandbrief covered bonds',
+    strength: 'Long fixes prevent renewal-reset extraction. Pfandbrief covered-bond system aligns bank with borrower. Low household leverage (~40% DTGDP). Rental culture (~50% of population).',
+    weakness: 'Aging population, low household formation. ECB monetary policy isn\'t calibrated for Germany alone. Recent housing inflation post-2020 shows EU buffer is thinning.',
+    factors: {
+      corruption: 'CPI 78. Banking culture is conservative; less corruption channeled through housing. Berlin had a 2010s wave of foreign cash buyers — partially addressed by AML reforms.',
+      geopolitics: 'Post-2022 energy shock exposed Russian-gas dependency. Industrial competitiveness eroding. EU defense reorientation reduces fiscal headroom for housing programs.',
+      demographics: 'Negative natural growth offset only by immigration. Aging population freezing housing supply (older owners stay put).',
+      trade: 'Export surplus shrinking. China competition + energy costs squeeze manufacturing margin → less wage growth → housing affordability tension.',
+    },
+  },
+  {
+    country: 'Japan', flag: '🇯🇵',
+    role: 'Strong monetary sovereignty',
+    petrodollar: 'low',
+    cpi: 73,
+    mortgageSystem: 'Variable + short-fix · ultra-low rates',
+    strength: 'Domestic savings + currency home bias = JPY stays domestic. 1.5% rates → lowest lifetime extraction in developed world. JHF (state agency) underwrites long fixes.',
+    weakness: '30-year deflation legacy. Cultural preference for new builds — older homes depreciate, breaking the appreciation-as-wealth model.',
+    factors: {
+      corruption: 'CPI 73. Construction industry has historic ties to local political networks (the "iron triangle"), but housing-finance is clean.',
+      geopolitics: 'US security alliance + China hedging. Yen-yuan settlement experiments small but rising. Population/economy shrinking → less geopolitical projection capacity.',
+      demographics: 'Negative population growth, severe aging. Rural depopulation creating "akiya" (vacant home) crisis — 9M+ vacant homes.',
+      trade: 'Persistent surplus has shrunk; yen weakness 2022-2024 hurt buying power. Tourism boom partially offsetting.',
+    },
+  },
+  {
+    country: 'Netherlands', flag: '🇳🇱',
+    role: 'EU core, financial center',
+    petrodollar: 'medium',
+    cpi: 78,
+    mortgageSystem: '20-30yr fixed · NHG state guarantee',
+    strength: 'NHG (state mortgage guarantee) transfers default risk to the state on qualifying loans. Long fixes. Tax-deductibility historically reduced effective cost.',
+    weakness: '87% household debt/GDP — high. Interest deduction is being phased out → painful adjustment ahead. House prices in major cities decoupled from wages.',
+    factors: {
+      corruption: 'CPI 78. Clean banking, but the Netherlands historically served as a corporate-tax + holding-company hub used to route opaque flows globally.',
+      geopolitics: 'EU + NATO + Atlanticist. Rotterdam port = trade choke point. EU energy-import dependency exposes housing-cost sensitivity to energy prices.',
+      demographics: 'Modest population growth. Severe housing shortage (~400k unit gap) keeps political pressure constant.',
+      trade: 'Trade/logistics surplus. Strong currency historically attracts capital that bid up urban property.',
+    },
+  },
+  {
+    country: 'Switzerland', flag: '🇨🇭',
+    role: 'Financial sanctuary',
+    petrodollar: 'low',
+    cpi: 82,
+    mortgageSystem: 'Interest-only legacy · rarely amortized',
+    strength: 'CHF strength absorbs imported inflation. Sophisticated household wealth provides collateral cushion. Strict mortgage-affordability rules.',
+    weakness: '121% household mortgage debt/GDP — global high. Cultural norm of never paying principal = perpetual interest extraction. Pension assets often pledged as collateral, transferring risk.',
+    factors: {
+      corruption: 'CPI 82. Domestic banking is clean and tightly supervised, but Switzerland\'s historical role as a wealth-secrecy jurisdiction means foreign-source funds influence prime real estate.',
+      geopolitics: 'Politically neutral but tied into EU economy. 2022 Russia sanctions broke Swiss neutrality precedent and may shift future capital-haven dynamics.',
+      demographics: 'Slow growth, mostly immigration. Urban housing supply constrained.',
+      trade: 'Pharma + machinery + finance surplus. CHF strength is structural → housing attracts foreign capital seeking currency hedge.',
+    },
+  },
+  {
+    country: 'Singapore', flag: '🇸🇬',
+    role: 'City-state financial hub',
+    petrodollar: 'medium',
+    cpi: 81,
+    mortgageSystem: 'SORA-linked floating · HDB public + private',
+    strength: 'HDB public housing covers ~80% of population — largely insulated from market extraction. CPF (Central Provident Fund) funnels savings into housing without market risk.',
+    weakness: 'Private condo segment severely unaffordable. ABSD (Additional Buyer Stamp Duty) is a constant adjustment lever — signals that the market always wants to overshoot.',
+    factors: {
+      corruption: 'CPI 81. Domestic governance is famously clean. But: Singapore is the primary destination for capital flight from regional jurisdictions with corruption issues (China, Indonesia, Malaysia, etc.) — prime property absorbs this flow.',
+      geopolitics: 'Walks tightrope between US and China. Singapore is becoming the regional wealth-management hub of choice as Hong Kong political risk rose 2019+.',
+      demographics: 'Aging native population; immigration tightly controlled. New-citizen quotas modulate housing demand.',
+      trade: 'Trade hub; petrochemicals + electronics. Currency managed, not free-floating.',
+    },
+  },
+  {
+    country: 'Hong Kong', flag: '🇭🇰',
+    role: 'Cross-border capital conduit',
+    petrodollar: 'high',
+    cpi: 77,
+    mortgageSystem: 'HIBOR-linked variable · concentrated',
+    strength: 'Efficient land utilization. Housing Authority public housing covers ~30%. Peg to USD provides stability.',
+    weakness: 'Highest price-to-income ratio in major markets (~18-23×). Political risk reshapes capital flows unpredictably. USD peg means importing every Fed move directly.',
+    factors: {
+      corruption: 'CPI 77. Strong ICAC tradition keeps formal corruption low. Post-2020 National Security Law shifted the political calculation but not the formal corruption index.',
+      geopolitics: 'Most exposed jurisdiction in this list — 2019-2020 protests + NSL reshaped capital flight patterns. Singapore + Vancouver + London absorbed outflows.',
+      demographics: 'Population declined modestly post-2020 as wealthy Hong Kongers emigrated. Aging accelerated.',
+      trade: 'Re-export hub. Tight integration with mainland China economy makes housing demand dependent on Chinese capital flows.',
+    },
+  },
+  {
+    country: 'India', flag: '🇮🇳',
+    role: 'Capital-controlled emerging',
+    petrodollar: 'low',
+    cpi: 39,
+    mortgageSystem: 'Floating rate · 20-yr typical · 8.5%+',
+    strength: 'Capital controls insulate from US monetary policy waves. Low mortgage penetration (~11% DTGDP) limits systemic risk. Family wealth + cash purchases dominant.',
+    weakness: 'Highest mortgage rates among major economies. Borrowers pay 1.8-2.0× principal in interest over a 20-yr loan. Title/record quality issues slow market.',
+    factors: {
+      corruption: 'CPI 39 — material vulnerability. Black money historically dominated real estate; 2016 demonetisation, RERA (real-estate regulator), and Benami Act tried to formalize this. Cash transactions still common in tier-2/3 cities.',
+      geopolitics: 'Strategic non-alignment; rising US relationship. BRICS member but pragmatic. Iran/Russia oil purchases continue in INR/RUB → small petrodollar diversification.',
+      demographics: 'Strong growth + urbanization. 60%+ rural still — massive housing demand pipeline. Median age 28.',
+      trade: 'Goods deficit; services + remittance surplus. Diaspora (NRI) flows fund significant share of premium housing.',
+    },
+  },
+  {
+    country: 'China', flag: '🇨🇳',
+    role: 'State-credit-driven, BRICS-aligned',
+    petrodollar: 'medium',
+    cpi: 43,
+    mortgageSystem: 'State-bank dominant · 30%+ down typical',
+    strength: 'State-controlled credit can be redirected by policy quickly. High savings rate (~30%) buffers shocks. Capital controls prevent flight.',
+    weakness: 'Evergrande-style developer overleverage. Ghost cities = malinvestment at scale. Local governments structurally addicted to land-sale revenue.',
+    factors: {
+      corruption: 'CPI 43. Xi anti-corruption campaign (2013+) reshaped real-estate flows; many "free" anti-corruption raids land on developers. But local-government conflicts of interest (sell land → fund operations) is structural, not investigable.',
+      geopolitics: 'BRICS leader. Yuan oil deals with Saudi (2023+), Russia (post-2022), Brazil grow incrementally. Each one weakens petrodollar, reshapes how monetary stimulus is absorbed.',
+      demographics: 'Population peaked 2022. Aging accelerating. Urbanization slowing. Housing demand structurally falling — Evergrande was the leading indicator.',
+      trade: 'Massive export surplus. Capital controls force most domestic savings into property → bubble dynamics.',
+    },
+  },
+  {
+    country: 'South Korea', flag: '🇰🇷',
+    role: 'Asian tiger, export-led',
+    petrodollar: 'medium',
+    cpi: 63,
+    mortgageSystem: 'Short fix + jeonse (deposit rental)',
+    strength: 'High household savings. Jeonse system uses a large refundable deposit instead of monthly rent, reducing cash drain for tenants.',
+    weakness: 'Seoul PIR among highest globally. Jeonse exposes tenants to landlord-default and deposit-loss risk when prices fall.',
+    factors: {
+      corruption: 'CPI 63. Chaebol-political ties historically influenced construction and development concessions. Multiple presidential corruption convictions in recent decades.',
+      geopolitics: 'US ally; tense with North Korea + ambivalent China relationship. Semiconductor export controls affect economic growth → housing demand.',
+      demographics: 'Lowest fertility in the world (~0.7). Population peaked 2020; Seoul still drawing internal migration as rural areas depopulate.',
+      trade: 'Tech + automotive export surplus. KRW absorbs East Asia regional shocks.',
+    },
+  },
+  {
+    country: 'Brazil', flag: '🇧🇷',
+    role: 'Resource exporter, BRICS',
+    petrodollar: 'medium',
+    cpi: 36,
+    mortgageSystem: 'Inflation-indexed (TR-linked)',
+    strength: 'BRICS settlement diversification reduces USD dependence. Recent housing-finance reforms expanded ownership pathways.',
+    weakness: 'Currency volatility transmits global shocks. High rates. Indexation can compound payments if inflation spikes.',
+    factors: {
+      corruption: 'CPI 36 — significant vulnerability. Lava Jato (Carwash) scandal 2014+ exposed real-estate channels for political bribery; subsequent reforms partial.',
+      geopolitics: 'BRICS member; bilateral yuan settlement with China growing. Iran/Russia oil purchases. Lula gov pushed BRICS expansion 2023+.',
+      demographics: 'Growth slowing but younger than developed peers. Urban informal-housing prevalence keeps formal market smaller than headline GDP suggests.',
+      trade: 'Iron ore + soy + oil exports. BRL volatility transmits to mortgage costs via TR-indexation.',
+    },
+  },
+  {
+    country: 'South Africa', flag: '🇿🇦',
+    role: 'African financial hub',
+    petrodollar: 'medium',
+    cpi: 43,
+    mortgageSystem: 'Prime-linked variable',
+    strength: 'Deep local banking sector. Established secondary mortgage market. Some inflation-protected products.',
+    weakness: '~11% rates + 7.5% realtor commission = the most extractive system in the comparison set when combined. ZAR volatility transfers monetary shocks directly to borrowers.',
+    factors: {
+      corruption: 'CPI 43. State-capture period under Zuma (2009-2018) reshaped property + construction flows; recovery uneven. Real-estate cash transactions remain a money-laundering vector.',
+      geopolitics: 'BRICS member; non-aligned. Hosting BRICS+ summit 2023. ZAR settles some Africa-region trade in alternative arrangements.',
+      demographics: 'Young population, fast urbanization, but high inequality and unemployment. Housing demand polarised between top + informal segments.',
+      trade: 'Mining + auto. ZAR is a high-beta EM currency that magnifies global risk shocks.',
+    },
+  },
+];
+
 // Per-node detail panel content (shown on hover / click).
 const FLOW_DETAIL = {
   buyer: {
@@ -1214,6 +1460,105 @@ function selectFlowNode(id) {
   `;
 }
 
+/* ────────────────────────── COUNTRY PROFILES ────────────────────────── */
+
+let countryFilter = 'all';
+
+function renderCountries() {
+  const grid = $('#country-grid');
+  if (!grid) return;
+  const list = countryFilter === 'all'
+    ? COUNTRY_PROFILES
+    : COUNTRY_PROFILES.filter(c => c.petrodollar === countryFilter);
+  grid.innerHTML = '';
+  for (const c of list) {
+    const cpiColor = c.cpi >= 75 ? 'oklch(0.78 0.16 162)'
+                   : c.cpi >= 50 ? 'oklch(0.78 0.16 70)'
+                   : 'oklch(0.72 0.22 25)';
+    const petroLabel = { issuer: 'Issuer', high: 'High exposure', medium: 'Medium', low: 'Low / sovereign' }[c.petrodollar] || c.petrodollar;
+    const card = document.createElement('article');
+    card.className = 'country-card';
+    card.dataset.country = c.country;
+    card.innerHTML = `
+      <header class="country-head">
+        <div class="country-flag">${c.flag}</div>
+        <div>
+          <h3 class="country-name">${esc(c.country)}</h3>
+          <div class="country-role">${esc(c.role)}</div>
+        </div>
+      </header>
+      <div class="country-chips">
+        <span class="cc cc-petro cc-petro-${c.petrodollar}">${esc(petroLabel)}</span>
+        <span class="cc" title="Transparency International CPI 2024 — higher is cleaner">CPI <strong style="color:${cpiColor}">${c.cpi}</strong></span>
+      </div>
+      <div class="country-system">${esc(c.mortgageSystem)}</div>
+      <div class="country-sw">
+        <div class="sw-cell sw-strength">
+          <div class="sw-h">+ Strength</div>
+          <div class="sw-b">${esc(c.strength)}</div>
+        </div>
+        <div class="sw-cell sw-weakness">
+          <div class="sw-h">– Weakness</div>
+          <div class="sw-b">${esc(c.weakness)}</div>
+        </div>
+      </div>
+      <button class="country-more">See full factor web →</button>
+    `;
+    card.querySelector('.country-more').addEventListener('click', () => openCountryDetail(c));
+    grid.appendChild(card);
+  }
+}
+
+function openCountryDetail(c) {
+  const body = $('#detail-body');
+  const petroLabel = { issuer: 'Issuer of the reserve currency', high: 'High exposure to USD policy', medium: 'Medium exposure', low: 'Low exposure (monetarily sovereign)' }[c.petrodollar];
+  body.className = 'detail country-detail';
+  body.innerHTML = `
+    <div style="font-size:48px;line-height:1;margin-bottom:4px">${c.flag}</div>
+    <h3>${esc(c.country)}</h3>
+    <div class="where">${esc(c.role)}</div>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-l">Petrodollar posture</div><div class="stat-v" style="font-size:14px">${esc(petroLabel)}</div></div>
+      <div class="stat"><div class="stat-l">CPI 2024</div><div class="stat-v">${c.cpi}<span style="font-size:11px;color:var(--muted-foreground);font-family:Geist Mono;margin-left:4px">/100</span></div></div>
+      <div class="stat"><div class="stat-l">Mortgage system</div><div class="stat-v" style="font-size:13px">${esc(c.mortgageSystem)}</div></div>
+    </div>
+    <div class="label">+ Strength</div>
+    <div class="body">${esc(c.strength)}</div>
+    <div class="label">– Weakness</div>
+    <div class="body">${esc(c.weakness)}</div>
+    <div class="label" style="margin-top:1.5rem;font-size:11px;color:var(--pop)">Web of factors</div>
+    <div class="factor-grid">
+      <div class="factor-cell">
+        <div class="factor-h">Corruption</div>
+        <div class="factor-b">${esc(c.factors.corruption)}</div>
+      </div>
+      <div class="factor-cell">
+        <div class="factor-h">Geopolitics</div>
+        <div class="factor-b">${esc(c.factors.geopolitics)}</div>
+      </div>
+      <div class="factor-cell">
+        <div class="factor-h">Demographics</div>
+        <div class="factor-b">${esc(c.factors.demographics)}</div>
+      </div>
+      <div class="factor-cell">
+        <div class="factor-h">Trade balance</div>
+        <div class="factor-b">${esc(c.factors.trade)}</div>
+      </div>
+    </div>
+  `;
+  $('#detail-modal').hidden = false;
+}
+
+function wireCountries() {
+  $$('.country-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      countryFilter = btn.dataset.petro;
+      $$('.country-chip').forEach(b => b.classList.toggle('active', b === btn));
+      renderCountries();
+    });
+  });
+}
+
 /* ────────────────────────── CYCLE ENGINE ────────────────────────── */
 
 const CYCLE_DEFAULTS = {
@@ -1611,6 +1956,7 @@ async function load() {
     wireCompareTray();
     wireValueStack();
     wireCycleEngine();
+    wireCountries();
     render();
     drawExpense();
     drawGranularPrice();
@@ -1619,6 +1965,7 @@ async function load() {
     drawFlow();
     drawHistoricalCharts();
     renderCycleEngine();
+    renderCountries();
   } catch (err) {
     console.error(err);
     $('#empty-state').hidden = false;

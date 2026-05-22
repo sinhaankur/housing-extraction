@@ -637,6 +637,175 @@ h2.display { font-size: clamp(2rem, 4.5vw, 3.25rem); }
   letter-spacing: 0.02em;
 }
 
+/* ───────── Country profiles ───────── */
+#countries { background: var(--background); }
+
+.country-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1.25rem;
+}
+.country-controls .param-eyebrow { margin-right: 8px; }
+.country-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--muted-foreground);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.country-chip:hover { color: var(--foreground); border-color: var(--foreground); }
+.country-chip.active { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
+
+.country-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1rem;
+}
+
+.country-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.12s, transform 0.12s;
+}
+.country-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.country-head {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.country-flag {
+  font-size: 36px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.country-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.country-role {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+.country-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.cc {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+.cc-petro { color: var(--foreground); }
+.cc-petro-issuer  { background: oklch(0.488 0.243 264.376 / 0.25); color: oklch(0.78 0.14 264); }
+.cc-petro-high    { background: oklch(0.65 0.22 25 / 0.22); color: oklch(0.78 0.2 25); }
+.cc-petro-medium  { background: oklch(0.7 0.18 70 / 0.22); color: oklch(0.85 0.16 70); }
+.cc-petro-low     { background: oklch(0.7 0.17 162 / 0.22); color: oklch(0.85 0.14 162); }
+
+.country-system {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted-foreground);
+  letter-spacing: 0.02em;
+  padding: 0.625rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.country-sw {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+}
+@media (max-width: 600px) {
+  .country-sw { grid-template-columns: 1fr; }
+}
+.sw-cell { font-size: 12px; line-height: 1.5; }
+.sw-h {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.sw-strength .sw-h { color: oklch(0.78 0.16 162); }
+.sw-weakness .sw-h { color: oklch(0.72 0.22 25); }
+.sw-b { color: var(--foreground); opacity: 0.85; }
+
+.country-more {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 7px 0;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--border);
+  color: var(--pop);
+  cursor: pointer;
+  text-align: left;
+  margin-top: auto;
+}
+.country-more:hover { color: oklch(0.75 0.246 16.439); }
+
+/* Country detail modal — factor web */
+.factor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+@media (max-width: 600px) {
+  .factor-grid { grid-template-columns: 1fr; }
+}
+.factor-cell {
+  background: oklch(0.18 0 0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.875rem 1rem;
+}
+.factor-h {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pop);
+  margin-bottom: 6px;
+}
+.factor-b {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--foreground);
+  opacity: 0.85;
+}
+
 /* ───────── Bank explorer ───────── */
 #banks { background: var(--background); }
 .presets-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.75rem; }
