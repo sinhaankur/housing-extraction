@@ -15,6 +15,7 @@
     <div class="brand"><span class="brand-dot"></span> HOUSING EXTRACTION</div>
     <div class="nav-links">
       <a href="#map-section">01 Map</a>
+      <a href="#india-section">01b India</a>
       <a href="#expense">02 What you pay</a>
       <a href="#value-breakdown">03 Value over time</a>
       <a href="#flow">04 How it connects</a>
@@ -63,6 +64,75 @@
           <span class="legend-item"><span class="legend-dot dot-specialist"></span>Specialist</span>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ━━━━━━━━━━━━━━━━ 01b INDIA FISCAL ━━━━━━━━━━━━━━━━ -->
+  <section id="india-section" class="india-fullbleed">
+    <div class="india-shell">
+
+      <div class="india-map-side">
+        <div id="india-map-wrap">
+          <div id="india-map"></div>
+          <div id="india-map-readout">
+            <div class="readout-label mono">Hover a state</div>
+            <div class="readout-name">—</div>
+            <div class="readout-value">—</div>
+          </div>
+          <div id="india-map-legend">
+            <div class="india-legend-title mono" id="india-legend-title">Net flow (₹ '000 cr)</div>
+            <div class="india-legend-bar"><span class="india-legend-grad" id="india-legend-grad"></span></div>
+            <div class="india-legend-ticks mono">
+              <span id="india-legend-min">—</span>
+              <span id="india-legend-mid">—</span>
+              <span id="india-legend-max">—</span>
+            </div>
+            <div class="india-legend-foot mono">Click a state for detail · drag the year slider for history</div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="india-side-panel">
+        <header class="india-side-header">
+          <div>
+            <div class="eyebrow">01b — India · fiscal federalism</div>
+            <h2 class="display india-display">Who <em>feeds</em> the Union. Who gets <em>fed</em>.</h2>
+            <p class="india-side-sub">
+              Center collects most of India's taxes, sends a slice back via the Finance Commission. Click any state for its 10-year breakdown, governance footprint, and pros / cons.
+            </p>
+          </div>
+          <a class="india-ref-link" href="references.html">Sources ↗</a>
+        </header>
+
+        <div class="india-controls">
+          <div class="india-view-group" role="tablist" aria-label="View">
+            <button class="ind-btn active" data-view="netFlow">Net flow</button>
+            <button class="ind-btn" data-view="devolution">Devolution in</button>
+            <button class="ind-btn" data-view="contribution">Contribution out</button>
+            <button class="ind-btn" data-view="gsdp">GSDP</button>
+            <button class="ind-btn" data-view="ownTax">Own tax</button>
+            <button class="ind-btn" data-view="ownTaxPctGsdp">Own tax / GSDP</button>
+            <button class="ind-btn" data-view="fcShare">FC share</button>
+          </div>
+          <div class="india-year-group">
+            <span class="india-year-label mono">Year</span>
+            <input type="range" id="india-year" min="0" max="9" value="9" step="1" aria-label="Year" />
+            <span class="india-year-value mono" id="india-year-value">FY24</span>
+          </div>
+          <div class="india-fc-strip" id="india-fc-strip" aria-hidden="true"></div>
+        </div>
+
+        <div class="india-main">
+          <div id="india-detail" class="india-detail">
+            <div class="india-detail-empty">
+              <div class="eyebrow">No state selected</div>
+              <p class="india-detail-empty-body">The map shows the active view across all states. Click any state for its history, fiscal flows, governance footprint, and pros / cons.</p>
+              <div id="india-summary" class="india-summary-inline"></div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
     </div>
   </section>
 

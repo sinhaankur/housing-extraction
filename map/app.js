@@ -188,6 +188,69 @@ const FLOW_EDGES = [
   ['cb',        'bank',         'heavy',  'reserves → lending',      0.5,  'feedback-up'],
 ];
 
+// India fiscal federalism: per-state FY24 baselines + growth → derives FY15-FY24.
+// Numbers in ₹ '000 crore (1 unit = ₹10,000 cr ≈ US$1.2B). Approximations — directional.
+// Sources: Finance Commission reports (14th, 15th), MoSPI state GSDP, CGA receipts data.
+const INDIA_STATES = {
+  'Maharashtra':       { fcShare15: 6.32,  fcShare14: 5.52,  gsdp24: 4030, dev24: 54,  contrib24: 350, ownTax24: 230, growth: 0.11, kind: 'contributor' },
+  'Uttar Pradesh':     { fcShare15: 17.94, fcShare14: 17.96, gsdp24: 2400, dev24: 152, contrib24: 50,  ownTax24: 130, growth: 0.10, kind: 'recipient' },
+  'Tamil Nadu':        { fcShare15: 4.08,  fcShare14: 4.02,  gsdp24: 2600, dev24: 35,  contrib24: 220, ownTax24: 160, growth: 0.11, kind: 'contributor' },
+  'Karnataka':         { fcShare15: 3.65,  fcShare14: 4.71,  gsdp24: 2500, dev24: 31,  contrib24: 280, ownTax24: 130, growth: 0.12, kind: 'contributor' },
+  'Gujarat':           { fcShare15: 3.48,  fcShare14: 3.08,  gsdp24: 2300, dev24: 30,  contrib24: 250, ownTax24: 100, growth: 0.11, kind: 'contributor' },
+  'West Bengal':       { fcShare15: 7.52,  fcShare14: 7.32,  gsdp24: 1700, dev24: 64,  contrib24: 80,  ownTax24: 80,  growth: 0.09, kind: 'recipient' },
+  'Bihar':             { fcShare15: 10.06, fcShare14: 9.67,  gsdp24: 850,  dev24: 85,  contrib24: 25,  ownTax24: 30,  growth: 0.10, kind: 'recipient' },
+  'Madhya Pradesh':    { fcShare15: 7.85,  fcShare14: 7.55,  gsdp24: 1450, dev24: 67,  contrib24: 50,  ownTax24: 75,  growth: 0.10, kind: 'recipient' },
+  'Rajasthan':         { fcShare15: 6.03,  fcShare14: 5.50,  gsdp24: 1500, dev24: 51,  contrib24: 50,  ownTax24: 80,  growth: 0.10, kind: 'recipient' },
+  'Andhra Pradesh':    { fcShare15: 4.05,  fcShare14: 4.30,  gsdp24: 1370, dev24: 34,  contrib24: 90,  ownTax24: 75,  growth: 0.11, kind: 'balanced' },
+  'Telangana':         { fcShare15: 2.10,  fcShare14: 2.44,  gsdp24: 1450, dev24: 18,  contrib24: 100, ownTax24: 80,  growth: 0.12, kind: 'contributor' },
+  'Kerala':            { fcShare15: 1.93,  fcShare14: 2.50,  gsdp24: 1200, dev24: 16,  contrib24: 50,  ownTax24: 70,  growth: 0.10, kind: 'balanced' },
+  'Punjab':            { fcShare15: 1.79,  fcShare14: 1.58,  gsdp24: 700,  dev24: 15,  contrib24: 30,  ownTax24: 50,  growth: 0.08, kind: 'balanced' },
+  'Haryana':           { fcShare15: 1.09,  fcShare14: 1.08,  gsdp24: 1100, dev24: 9,   contrib24: 75,  ownTax24: 50,  growth: 0.11, kind: 'contributor' },
+  'Odisha':            { fcShare15: 4.53,  fcShare14: 4.64,  gsdp24: 800,  dev24: 38,  contrib24: 30,  ownTax24: 45,  growth: 0.10, kind: 'recipient' },
+  'Assam':             { fcShare15: 3.13,  fcShare14: 3.31,  gsdp24: 530,  dev24: 27,  contrib24: 12,  ownTax24: 16,  growth: 0.09, kind: 'recipient' },
+  'Jharkhand':         { fcShare15: 1.36,  fcShare14: 3.14,  gsdp24: 480,  dev24: 12,  contrib24: 18,  ownTax24: 22,  growth: 0.09, kind: 'balanced' },
+  'Chhattisgarh':      { fcShare15: 3.41,  fcShare14: 3.07,  gsdp24: 460,  dev24: 29,  contrib24: 20,  ownTax24: 22,  growth: 0.10, kind: 'recipient' },
+  'Uttarakhand':       { fcShare15: 1.04,  fcShare14: 1.05,  gsdp24: 320,  dev24: 9,   contrib24: 15,  ownTax24: 14,  growth: 0.09, kind: 'balanced' },
+  'Himachal Pradesh':  { fcShare15: 0.83,  fcShare14: 0.71,  gsdp24: 200,  dev24: 7,   contrib24: 6,   ownTax24: 9,   growth: 0.08, kind: 'balanced' },
+  'Goa':               { fcShare15: 0.39,  fcShare14: 0.38,  gsdp24: 100,  dev24: 3,   contrib24: 12,  ownTax24: 6,   growth: 0.09, kind: 'contributor' },
+  'Tripura':           { fcShare15: 0.71,  fcShare14: 0.64,  gsdp24: 80,   dev24: 6,   contrib24: 2,   ownTax24: 3,   growth: 0.08, kind: 'recipient' },
+  'Manipur':           { fcShare15: 0.72,  fcShare14: 0.62,  gsdp24: 50,   dev24: 6,   contrib24: 1,   ownTax24: 2,   growth: 0.08, kind: 'recipient' },
+  'Meghalaya':         { fcShare15: 0.77,  fcShare14: 0.64,  gsdp24: 50,   dev24: 7,   contrib24: 1,   ownTax24: 2,   growth: 0.08, kind: 'recipient' },
+  'Mizoram':           { fcShare15: 0.51,  fcShare14: 0.46,  gsdp24: 35,   dev24: 4,   contrib24: 0.3, ownTax24: 1,   growth: 0.08, kind: 'recipient' },
+  'Nagaland':          { fcShare15: 0.57,  fcShare14: 0.50,  gsdp24: 45,   dev24: 5,   contrib24: 0.5, ownTax24: 1,   growth: 0.07, kind: 'recipient' },
+  'Sikkim':            { fcShare15: 0.39,  fcShare14: 0.37,  gsdp24: 50,   dev24: 3,   contrib24: 1,   ownTax24: 1.5, growth: 0.10, kind: 'balanced' },
+  'Arunachal Pradesh': { fcShare15: 1.76,  fcShare14: 1.37,  gsdp24: 38,   dev24: 15,  contrib24: 0.3, ownTax24: 1,   growth: 0.09, kind: 'recipient' },
+  'Delhi':             { fcShare15: 0,     fcShare14: 0,     gsdp24: 1100, dev24: 0,   contrib24: 220, ownTax24: 70,  growth: 0.09, kind: 'contributor' },
+  'Jammu & Kashmir':   { fcShare15: 0,     fcShare14: 1.85,  gsdp24: 240,  dev24: 0,   contrib24: 4,   ownTax24: 14,  growth: 0.08, kind: 'recipient' },
+  'Ladakh':            { fcShare15: 0,     fcShare14: 0,     gsdp24: 30,   dev24: 0,   contrib24: 0.5, ownTax24: 1,   growth: 0.08, kind: 'recipient' },
+  'Puducherry':        { fcShare15: 0,     fcShare14: 0,     gsdp24: 50,   dev24: 0,   contrib24: 2,   ownTax24: 4,   growth: 0.07, kind: 'balanced' },
+  'Chandigarh':        { fcShare15: 0,     fcShare14: 0,     gsdp24: 50,   dev24: 0,   contrib24: 5,   ownTax24: 2,   growth: 0.07, kind: 'balanced' },
+  'Andaman & Nicobar': { fcShare15: 0,     fcShare14: 0,     gsdp24: 12,   dev24: 0,   contrib24: 0.3, ownTax24: 0.5, growth: 0.07, kind: 'balanced' },
+  'Lakshadweep':       { fcShare15: 0,     fcShare14: 0,     gsdp24: 3,    dev24: 0,   contrib24: 0.1, ownTax24: 0.2, growth: 0.06, kind: 'balanced' },
+  'Dadra and Nagar Haveli and Daman and Diu': { fcShare15: 0, fcShare14: 0, gsdp24: 30, dev24: 0, contrib24: 1, ownTax24: 0.8, growth: 0.08, kind: 'balanced' },
+};
+
+const INDIA_NARRATIVES = {
+  contributor: {
+    proLabel: 'Pro · contributing more',
+    pro: 'Generates bulk of national revenue. Political leverage in central decisions; attracts industry, talent, infrastructure. Dominates GDP-share narratives.',
+    conLabel: 'Con · contributing more',
+    con: 'Net fiscal outflow — tax origin > devolution received. Funds welfare in poorer states without proportional return. The basis of southern/western fiscal grievances ("why do we subsidise?").',
+  },
+  recipient: {
+    proLabel: 'Pro · receiving more',
+    pro: 'Devolution + grants close the fiscal gap that own-tax cannot. Enables welfare floor + capital expenditure impossible from own resources.',
+    conLabel: 'Con · receiving more',
+    con: 'Dependence on Center weakens political-fiscal autonomy. Own-tax effort often underperforms because devolution backfills — reform incentives blunted.',
+  },
+  balanced: {
+    proLabel: 'Pro · balance',
+    pro: 'Less politically exposed in fiscal-federalism debates. Devolution roughly matches origin contribution.',
+    conLabel: 'Con · balance',
+    con: 'Less leverage in either coalition (contributor states pushing origin-weighted shares; recipient states pushing equity-weighted). Often sidelined in 16th FC negotiations.',
+  },
+};
+
 // Country profiles — strength + weakness + petrodollar exposure for each major market.
 // Petrodollar exposure: 'issuer' (US), 'high' (Anglosphere + HK), 'medium' (EU + emerging),
 // 'low' (monetarily sovereign — Japan, India, Switzerland).
@@ -1460,6 +1523,397 @@ function selectFlowNode(id) {
   `;
 }
 
+/* ────────────────────────── INDIA FISCAL FEDERALISM MAP ────────────────────────── */
+
+const INDIA_VIEW_META = {
+  netFlow:        { label: 'Net flow (₹ \'000 cr)',          fmt: v => fmtIndiaSigned(v),    diverging: true,  desc: 'Devolution received − contribution. Negative = net contributor.' },
+  devolution:     { label: 'Devolution received (₹ \'000 cr)', fmt: v => fmtIndia(v),       diverging: false, desc: 'Share of central tax pool transferred to the state.' },
+  contribution:   { label: 'Contribution to Center (₹ \'000 cr)', fmt: v => fmtIndia(v),    diverging: false, desc: 'Approx central-tax origin from the state.' },
+  gsdp:           { label: 'GSDP (₹ \'000 cr)',              fmt: v => fmtIndia(v),         diverging: false, desc: 'State gross domestic product, current prices.' },
+  ownTax:         { label: 'Own tax revenue (₹ \'000 cr)',    fmt: v => fmtIndia(v),         diverging: false, desc: 'State VAT/GST share, stamps, excise, motor-vehicle.' },
+  ownTaxPctGsdp:  { label: 'Own tax / GSDP (%)',             fmt: v => v.toFixed(2)+'%',    diverging: false, desc: 'Fiscal effort indicator — higher = state collects more relative to economy.' },
+  fcShare:        { label: 'Finance Commission share (%)',   fmt: v => v.toFixed(2)+'%',    diverging: false, desc: '14th FC for FY16-FY20; 15th FC for FY21+.' },
+};
+
+function fmtIndia(v) {
+  if (v == null) return '–';
+  if (Math.abs(v) >= 1000) return (v/1000).toFixed(2) + 'L';
+  if (Math.abs(v) >= 100)  return Math.round(v) + 'k';
+  if (Math.abs(v) >= 10)   return v.toFixed(1) + 'k';
+  return v.toFixed(2) + 'k';
+}
+function fmtIndiaSigned(v) {
+  if (v == null) return '–';
+  const s = v >= 0 ? '+' : '−';
+  return s + fmtIndia(Math.abs(v));
+}
+
+const indiaState = { view: 'netFlow', yearIdx: 9 };
+let indiaMap = null;
+let indiaGeoLayer = null;
+let indiaSelectedName = null;
+
+function yearIdxToLabel(i) { return 'FY' + (15 + i); }
+function isFC15(yearIdx) { return yearIdx >= 6; } // FY21+ → 15th FC
+
+function getStateValue(name, view = indiaState.view, yearIdx = indiaState.yearIdx) {
+  const d = INDIA_STATES[name];
+  if (!d) return null;
+  // Years backward from FY24 (idx 9) → apply decay
+  const yrsBack = 9 - yearIdx;
+  const factor = Math.pow(1 + d.growth, -yrsBack);
+  const dev = d.dev24 * factor;
+  const con = d.contrib24 * factor;
+  const own = d.ownTax24 * factor;
+  const gsdp = d.gsdp24 * factor;
+  if (view === 'gsdp')          return gsdp;
+  if (view === 'devolution')    return dev;
+  if (view === 'contribution')  return con;
+  if (view === 'ownTax')        return own;
+  if (view === 'ownTaxPctGsdp') return gsdp ? (own/gsdp) * 100 : 0;
+  if (view === 'fcShare')       return isFC15(yearIdx) ? d.fcShare15 : d.fcShare14;
+  if (view === 'netFlow')       return dev - con;
+  return 0;
+}
+
+function getMetricRange() {
+  const view = indiaState.view;
+  const vals = Object.keys(INDIA_STATES).map(n => getStateValue(n, view)).filter(v => v != null);
+  return { min: Math.min(...vals), max: Math.max(...vals) };
+}
+
+// Color scales (OKLCH for portfolio aesthetic)
+function colorForValue(v, range, diverging) {
+  if (v == null) return 'oklch(0.22 0 0)';
+  if (diverging) {
+    // Symmetric around 0: red (contributor) → grey → green (recipient)
+    const m = Math.max(Math.abs(range.min), Math.abs(range.max));
+    const t = Math.max(-1, Math.min(1, v / m));
+    if (t < 0) {
+      const k = -t; // 0..1
+      return `oklch(${(0.65 - 0.15*k).toFixed(3)} ${(0.05 + 0.18*k).toFixed(3)} 25)`;
+    } else {
+      const k = t;
+      return `oklch(${(0.65 + 0.05*k).toFixed(3)} ${(0.05 + 0.13*k).toFixed(3)} 162)`;
+    }
+  }
+  const t = range.max === range.min ? 0 : (v - range.min) / (range.max - range.min);
+  // Sequential: dark warm → bright warm (yellow/orange ramp)
+  return `oklch(${(0.30 + 0.45*t).toFixed(3)} ${(0.05 + 0.16*t).toFixed(3)} 70)`;
+}
+
+function styleIndiaState(feature) {
+  const name = feature.properties.ST_NM;
+  const data = INDIA_STATES[name];
+  if (!data) {
+    return { className: 'india-state-path no-data', fillColor: 'oklch(0.22 0 0)', fillOpacity: 0.4, color: 'oklch(0.35 0 0)', weight: 0.6 };
+  }
+  const value = getStateValue(name);
+  const meta = INDIA_VIEW_META[indiaState.view];
+  const range = getMetricRange();
+  return {
+    className: 'india-state-path' + (name === indiaSelectedName ? ' selected' : ''),
+    fillColor: colorForValue(value, range, meta.diverging),
+    fillOpacity: 0.85,
+    color: name === indiaSelectedName ? 'oklch(0.98 0 0)' : 'oklch(0.985 0 0 / 0.22)',
+    weight: name === indiaSelectedName ? 1.5 : 0.5,
+  };
+}
+
+async function initIndiaMap() {
+  if (indiaMap || !document.getElementById('india-map')) return;
+  indiaMap = L.map('india-map', {
+    zoomControl: false,
+    attributionControl: false,
+    dragging: true,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    keyboard: false,
+    tap: false,
+    minZoom: 3.4,
+    maxZoom: 6,
+  }).setView([22.5, 80], 4.2);
+
+  try {
+    const res = await fetch('india-states.geojson');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    indiaGeoLayer = L.geoJSON(data, {
+      style: styleIndiaState,
+      onEachFeature: (feature, layer) => {
+        const name = feature.properties.ST_NM;
+        layer.on('mouseover', () => {
+          updateIndiaReadout(name);
+          layer.setStyle({ weight: 1.5, color: 'oklch(0.98 0 0)' });
+          layer.bringToFront();
+        });
+        layer.on('mouseout', () => {
+          if (name !== indiaSelectedName) {
+            indiaGeoLayer.resetStyle(layer);
+          }
+          clearIndiaReadout();
+        });
+        layer.on('click', () => selectIndiaState(name));
+      },
+    }).addTo(indiaMap);
+    indiaMap.fitBounds(indiaGeoLayer.getBounds(), { padding: [10, 10] });
+  } catch (err) {
+    console.error('Failed to load India geojson:', err);
+    const wrap = document.getElementById('india-map');
+    if (wrap) wrap.innerHTML = '<div style="padding:2rem;color:var(--muted-foreground);font-family:Geist Mono">Could not load india-states.geojson. Serve the map/ folder over a local server.</div>';
+    return;
+  }
+
+  drawIndiaLegend();
+  drawIndiaFCStrip();
+  drawIndiaSummary();
+}
+
+function updateIndiaReadout(name) {
+  const readout = document.getElementById('india-map-readout');
+  if (!readout) return;
+  const data = INDIA_STATES[name];
+  const meta = INDIA_VIEW_META[indiaState.view];
+  const value = getStateValue(name);
+  readout.querySelector('.readout-label').textContent = data ? `${name} · ${meta.label}` : name;
+  readout.querySelector('.readout-name').textContent = name;
+  readout.querySelector('.readout-value').textContent = data ? meta.fmt(value) : 'no data';
+}
+
+function clearIndiaReadout() {
+  // Keep selected state's data visible if any.
+  if (indiaSelectedName) updateIndiaReadout(indiaSelectedName);
+  else {
+    const readout = document.getElementById('india-map-readout');
+    if (!readout) return;
+    readout.querySelector('.readout-label').textContent = 'Hover a state';
+    readout.querySelector('.readout-name').textContent = '—';
+    readout.querySelector('.readout-value').textContent = '—';
+  }
+}
+
+function selectIndiaState(name) {
+  indiaSelectedName = name;
+  // Restyle to highlight selected
+  if (indiaGeoLayer) {
+    indiaGeoLayer.eachLayer(l => indiaGeoLayer.resetStyle(l));
+  }
+  drawIndiaDetail(name);
+  updateIndiaReadout(name);
+}
+
+function drawIndiaDetail(name) {
+  const panel = document.getElementById('india-detail');
+  if (!panel) return;
+  const d = INDIA_STATES[name];
+  if (!d) {
+    panel.innerHTML = `
+      <div class="india-detail-empty">
+        <div class="eyebrow">${esc(name)}</div>
+        <p class="india-detail-empty-body">No fiscal-devolution data for this Union Territory in our dataset.</p>
+        <button class="india-back-btn" id="india-back" style="margin-top:1rem">← Back</button>
+      </div>`;
+    document.getElementById('india-back')?.addEventListener('click', clearIndiaSelection);
+    return;
+  }
+  const narrative = INDIA_NARRATIVES[d.kind];
+  const yearLabel = yearIdxToLabel(indiaState.yearIdx);
+  const dev  = getStateValue(name, 'devolution');
+  const con  = getStateValue(name, 'contribution');
+  const own  = getStateValue(name, 'ownTax');
+  const gsdp = getStateValue(name, 'gsdp');
+  const net  = dev - con;
+
+  // Sparkline: three series (dev, con, net) over 10 years
+  const series = {
+    dev:  Array.from({length:10}, (_,i) => getStateValue(name, 'devolution',   i)),
+    con:  Array.from({length:10}, (_,i) => getStateValue(name, 'contribution', i)),
+    net:  Array.from({length:10}, (_,i) => getStateValue(name, 'devolution', i) - getStateValue(name, 'contribution', i)),
+  };
+  const all = [...series.dev, ...series.con, ...series.net];
+  const yMin = Math.min(0, ...all);
+  const yMax = Math.max(...all) * 1.05;
+  const sparkW = 320, sparkH = 110, pad = 6;
+  const sx = i => pad + (i / 9) * (sparkW - pad*2);
+  const sy = v => pad + (1 - (v - yMin) / (yMax - yMin || 1)) * (sparkH - pad*2 - 14);
+  const pathOf = arr => arr.map((v,i) => `${i?'L':'M'}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+  const zeroLine = yMin < 0
+    ? `<line x1="${pad}" x2="${sparkW-pad}" y1="${sy(0)}" y2="${sy(0)}" stroke="oklch(0.4 0 0)" stroke-dasharray="2 3" stroke-width="0.8"/>`
+    : '';
+  const currentMarker = `<line x1="${sx(indiaState.yearIdx)}" x2="${sx(indiaState.yearIdx)}" y1="${pad}" y2="${sparkH-pad-12}" stroke="oklch(0.98 0 0 / 0.4)" stroke-dasharray="2 2" stroke-width="0.8"/>`;
+  const xLabels = [0, 3, 6, 9].map(i => `<text x="${sx(i)}" y="${sparkH-2}" text-anchor="middle" fill="oklch(0.55 0 0)" font-family="Geist Mono" font-size="9">FY${15+i}</text>`).join('');
+
+  const fcShare = isFC15(indiaState.yearIdx) ? d.fcShare15 : d.fcShare14;
+  const fcLabel = isFC15(indiaState.yearIdx) ? '15th FC' : '14th FC';
+  const netClass = net < 0 ? 'donor' : 'recipient';
+
+  panel.innerHTML = `
+    <div class="india-detail-head">
+      <div>
+        <div class="india-detail-name">${esc(name)}</div>
+        <div class="india-detail-meta">${esc(d.kind)} · ${esc(yearLabel)}</div>
+      </div>
+      <button class="india-back-btn" id="india-back">← Clear</button>
+    </div>
+
+    <div class="india-stat-grid">
+      <div class="india-stat recipient"><div class="label">Devolution in</div><div class="value">${fmtIndia(dev)}</div></div>
+      <div class="india-stat donor"><div class="label">Contribution out</div><div class="value">${fmtIndia(con)}</div></div>
+      <div class="india-stat ${netClass}"><div class="label">Net flow</div><div class="value">${fmtIndiaSigned(net)}</div></div>
+      <div class="india-stat"><div class="label">${esc(fcLabel)} share</div><div class="value">${fcShare.toFixed(2)}%</div></div>
+      <div class="india-stat"><div class="label">Own tax</div><div class="value">${fmtIndia(own)}</div></div>
+      <div class="india-stat"><div class="label">GSDP</div><div class="value">${fmtIndia(gsdp)}</div></div>
+    </div>
+
+    <div class="india-detail-section-title">FY15 → FY24 · in / out / net</div>
+    <svg id="india-spark" viewBox="0 0 ${sparkW} ${sparkH}" preserveAspectRatio="xMidYMid meet">
+      ${zeroLine}
+      ${currentMarker}
+      <path d="${pathOf(series.dev)}" fill="none" stroke="oklch(0.7 0.17 162)" stroke-width="1.5"/>
+      <path d="${pathOf(series.con)}" fill="none" stroke="oklch(0.7 0.18 30)" stroke-width="1.5"/>
+      <path d="${pathOf(series.net)}" fill="none" stroke="oklch(0.98 0 0)" stroke-width="1.5" stroke-dasharray="3 2"/>
+      ${xLabels}
+    </svg>
+    <div class="india-spark-legend">
+      <span><span class="sw" style="background:oklch(0.7 0.17 162)"></span>Devolution in</span>
+      <span><span class="sw" style="background:oklch(0.7 0.18 30)"></span>Contribution out</span>
+      <span><span class="sw" style="background:oklch(0.98 0 0);background-image:linear-gradient(to right, transparent 50%, oklch(0.145 0 0) 50%);background-size:4px 1px"></span>Net flow</span>
+    </div>
+
+    <div class="india-detail-section-title">Structural arguments</div>
+    <div class="india-proscons">
+      <div class="india-pc pros">
+        <h4>${esc(narrative.proLabel)}</h4>
+        <ul><li>${esc(narrative.pro)}</li></ul>
+      </div>
+      <div class="india-pc cons">
+        <h4>${esc(narrative.conLabel)}</h4>
+        <ul><li>${esc(narrative.con)}</li></ul>
+      </div>
+    </div>
+  `;
+  document.getElementById('india-back')?.addEventListener('click', clearIndiaSelection);
+}
+
+function clearIndiaSelection() {
+  indiaSelectedName = null;
+  if (indiaGeoLayer) indiaGeoLayer.eachLayer(l => indiaGeoLayer.resetStyle(l));
+  const panel = document.getElementById('india-detail');
+  if (panel) {
+    panel.innerHTML = `
+      <div class="india-detail-empty">
+        <div class="eyebrow">No state selected</div>
+        <p class="india-detail-empty-body">Click any state on the map to see its 10-year history, what it sends to the Center, what it receives back, and the structural arguments for and against.</p>
+      </div>`;
+  }
+  clearIndiaReadout();
+}
+
+function drawIndiaLegend() {
+  const view = indiaState.view;
+  const meta = INDIA_VIEW_META[view];
+  const range = getMetricRange();
+  document.getElementById('india-legend-title').textContent = meta.label;
+  const gradient = document.getElementById('india-legend-grad');
+  if (meta.diverging) {
+    gradient.style.background = 'linear-gradient(90deg, oklch(0.5 0.22 25), oklch(0.4 0.04 90) 50%, oklch(0.7 0.18 162))';
+    document.getElementById('india-legend-min').textContent = fmtIndiaSigned(-Math.max(Math.abs(range.min), Math.abs(range.max)));
+    document.getElementById('india-legend-mid').textContent = '0';
+    document.getElementById('india-legend-max').textContent = fmtIndiaSigned(Math.max(Math.abs(range.min), Math.abs(range.max)));
+  } else {
+    gradient.style.background = 'linear-gradient(90deg, oklch(0.30 0.05 70), oklch(0.55 0.13 70) 50%, oklch(0.75 0.21 70))';
+    document.getElementById('india-legend-min').textContent = meta.fmt(range.min);
+    document.getElementById('india-legend-mid').textContent = meta.fmt((range.min + range.max) / 2);
+    document.getElementById('india-legend-max').textContent = meta.fmt(range.max);
+  }
+}
+
+function drawIndiaFCStrip() {
+  const strip = document.getElementById('india-fc-strip');
+  if (!strip) return;
+  // Three-segment colored bar: 13th FC (FY15 alone), 14th FC (FY16-20), 15th FC (FY21+)
+  const markerPct = fcMarkerLeftPct(indiaState.yearIdx);
+  strip.innerHTML = `
+    <div class="fc-seg fc-13"><span class="fc-label">13th FC · FY15</span></div>
+    <div class="fc-seg fc-14"><span class="fc-label">14th FC · FY16–20</span></div>
+    <div class="fc-seg fc-15"><span class="fc-label">15th FC · FY21–26</span></div>
+    <div class="fc-marker" style="left:${markerPct.toFixed(2)}%"></div>
+  `;
+}
+
+function fcMarkerLeftPct(idx) {
+  if (idx === 0) return 5;
+  if (idx <= 5) return 10 + ((idx - 0.5) / 5) * 50;
+  return 60 + ((idx - 5.5) / 4) * 40;
+}
+
+function drawIndiaSummary() {
+  const wrap = document.getElementById('india-summary');
+  if (!wrap) return;
+  const view = indiaState.view;
+  const meta = INDIA_VIEW_META[view];
+  // Top 3 + bottom 3 by current metric
+  const entries = Object.keys(INDIA_STATES)
+    .map(n => ({ name: n, v: getStateValue(n, view) }))
+    .filter(e => e.v != null)
+    .sort((a,b) => b.v - a.v);
+  const top = entries.slice(0, 3);
+  const bot = entries.slice(-3).reverse();
+  // Aggregate totals
+  const sumDev = entries.reduce((s, e) => s + (INDIA_STATES[e.name].dev24 * Math.pow(1 + INDIA_STATES[e.name].growth, -(9-indiaState.yearIdx))), 0);
+  const sumCon = entries.reduce((s, e) => s + (INDIA_STATES[e.name].contrib24 * Math.pow(1 + INDIA_STATES[e.name].growth, -(9-indiaState.yearIdx))), 0);
+  wrap.innerHTML = `
+    <div class="summary-card">
+      <div class="summary-h mono">Top 3 · ${esc(meta.label)} · ${esc(yearIdxToLabel(indiaState.yearIdx))}</div>
+      <ol>${top.map(e => `<li><span>${esc(e.name)}</span><span class="mono">${esc(meta.fmt(e.v))}</span></li>`).join('')}</ol>
+    </div>
+    <div class="summary-card">
+      <div class="summary-h mono">Bottom 3 · ${esc(meta.label)}</div>
+      <ol>${bot.map(e => `<li><span>${esc(e.name)}</span><span class="mono">${esc(meta.fmt(e.v))}</span></li>`).join('')}</ol>
+    </div>
+    <div class="summary-card">
+      <div class="summary-h mono">Total · ${esc(yearIdxToLabel(indiaState.yearIdx))}</div>
+      <div class="summary-row"><span>Devolution (out from Center)</span><span class="mono">${fmtIndia(sumDev)}</span></div>
+      <div class="summary-row"><span>Contribution (origin → Center)</span><span class="mono">${fmtIndia(sumCon)}</span></div>
+      <div class="summary-row"><span>Net to states</span><span class="mono ${sumDev<sumCon?'neg':'pos'}">${fmtIndiaSigned(sumDev - sumCon)}</span></div>
+    </div>
+  `;
+}
+
+function onIndiaUpdate() {
+  if (indiaGeoLayer) {
+    indiaGeoLayer.eachLayer(l => indiaGeoLayer.resetStyle(l));
+    indiaGeoLayer.setStyle(styleIndiaState);
+  }
+  drawIndiaLegend();
+  drawIndiaFCStrip();
+  drawIndiaSummary();
+  if (indiaSelectedName) drawIndiaDetail(indiaSelectedName);
+  if (indiaSelectedName) updateIndiaReadout(indiaSelectedName);
+}
+
+function wireIndia() {
+  if (!document.getElementById('india-section')) return;
+  document.querySelectorAll('.ind-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ind-btn').forEach(b => b.classList.toggle('active', b === btn));
+      indiaState.view = btn.dataset.view;
+      onIndiaUpdate();
+    });
+  });
+  const slider = document.getElementById('india-year');
+  if (slider) {
+    slider.addEventListener('input', () => {
+      indiaState.yearIdx = +slider.value;
+      document.getElementById('india-year-value').textContent = yearIdxToLabel(indiaState.yearIdx);
+      onIndiaUpdate();
+    });
+  }
+  // Init the map lazily after a short delay to let layout settle.
+  setTimeout(initIndiaMap, 100);
+}
+
 /* ────────────────────────── COUNTRY PROFILES ────────────────────────── */
 
 let countryFilter = 'all';
@@ -1957,6 +2411,7 @@ async function load() {
     wireValueStack();
     wireCycleEngine();
     wireCountries();
+    wireIndia();
     render();
     drawExpense();
     drawGranularPrice();
@@ -1978,3 +2433,511 @@ async function load() {
 }
 
 load();
+
+/* ══════════════════════════════════════════════════════════════════════
+   INDIA FISCAL FEDERALISM — choropleth + history + pros/cons
+   ══════════════════════════════════════════════════════════════════════ */
+
+(function initIndiaSection() {
+  const root = document.getElementById('india-section');
+  if (!root) return;
+
+  const VIEWS = {
+    netFlow: {
+      label: 'Net flow (₹ \'000 cr)',
+      shortLabel: 'Net flow',
+      diverging: true,
+      compute: (d) => (d.devolution + d.grants) - d.contribution,
+      fmt: v => (v >= 0 ? '+' : '') + v.toFixed(1) + ' k cr',
+      help: 'Devolution + grants received minus estimated federal taxes contributed. Positive = net recipient. Negative = net donor.'
+    },
+    devolution: {
+      label: 'Central tax devolution (₹ \'000 cr)',
+      shortLabel: 'Devolution',
+      diverging: false,
+      compute: (d) => d.devolution,
+      fmt: v => v.toFixed(1) + ' k cr',
+      help: 'State\'s share of the divisible pool of central taxes, per Finance Commission horizontal formula.'
+    },
+    contribution: {
+      label: 'Estimated contribution to Center (₹ \'000 cr)',
+      shortLabel: 'Contribution',
+      diverging: false,
+      compute: (d) => d.contribution,
+      fmt: v => v.toFixed(1) + ' k cr',
+      help: 'Estimated federal taxes (income, corporate, GST/IGST origin, customs) attributable to the state.'
+    },
+    gsdp: {
+      label: 'GSDP (₹ \'000 cr)',
+      shortLabel: 'GSDP',
+      diverging: false,
+      compute: (d) => d.gsdp,
+      fmt: v => v.toFixed(0) + ' k cr',
+      help: 'Gross State Domestic Product at current prices.'
+    },
+    ownTax: {
+      label: 'Own tax revenue (₹ \'000 cr)',
+      shortLabel: 'Own tax',
+      diverging: false,
+      compute: (d) => d.ownTax,
+      fmt: v => v.toFixed(1) + ' k cr',
+      help: 'Taxes the state collects itself — VAT/SGST, stamp duty, excise on liquor, vehicle tax, etc.'
+    },
+    ownTaxPctGsdp: {
+      label: 'Own tax / GSDP (%)',
+      shortLabel: 'Own tax / GSDP',
+      diverging: false,
+      compute: (d) => (d.ownTax / d.gsdp) * 100,
+      fmt: v => v.toFixed(2) + '%',
+      help: 'Fiscal effort — what % of the state economy its own tax machinery captures.'
+    },
+    fcShare: {
+      label: 'Finance Commission horizontal share (%)',
+      shortLabel: 'FC share',
+      diverging: false,
+      compute: (d) => d.fcShare,
+      fmt: v => v.toFixed(2) + '%',
+      help: 'Percent of total devolution allocated to this state under the active Finance Commission.'
+    }
+  };
+
+  const ui = {
+    state: { view: 'netFlow', yearIdx: 9, selected: null, hover: null }
+  };
+
+  let DATA = null;        // india-fiscal.json
+  let GEO = null;         // geojson
+  let map = null;         // Leaflet map
+  let geoLayer = null;    // Leaflet GeoJSON layer
+  let pathByName = new Map();
+
+  /* ───────── helpers ───────── */
+  const $ind = s => root.querySelector(s);
+  const $$ind = s => root.querySelectorAll(s);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  // perceptually-smooth interpolation in oklch space (approximate — pass-through)
+  function oklch(l, c, h, a = 1) { return `oklch(${l} ${c} ${h} / ${a})`; }
+  // sequential scale: dark grey -> warm orange/red, value in [0,1]
+  function seqColor(t) {
+    t = Math.max(0, Math.min(1, t));
+    const l = 0.22 + 0.50 * t;     // 0.22 -> 0.72
+    const c = 0.02 + 0.20 * t;     // muted -> saturated
+    const h = 50 + 0 * t;          // warm
+    return oklch(l, c, h);
+  }
+  // diverging scale: cool teal (donor, t<0.5) <-> warm orange (recipient, t>0.5)
+  function divColor(t) {
+    t = Math.max(0, Math.min(1, t));
+    if (t < 0.5) {
+      const k = 1 - t * 2; // 1 at extreme donor, 0 at neutral
+      const l = 0.30 + 0.40 * k;
+      const c = 0.02 + 0.16 * k;
+      const h = 210;
+      return oklch(l, c, h);
+    } else {
+      const k = (t - 0.5) * 2; // 0 at neutral, 1 at extreme recipient
+      const l = 0.30 + 0.45 * k;
+      const c = 0.02 + 0.20 * k;
+      const h = 35;
+      return oklch(l, c, h);
+    }
+  }
+  function colorFor(value, view, domain) {
+    if (value === null || value === undefined || Number.isNaN(value)) return 'oklch(0.22 0 0)';
+    if (view.diverging) {
+      const max = Math.max(Math.abs(domain.min), Math.abs(domain.max));
+      if (max <= 0) return divColor(0.5);
+      const t = 0.5 + (value / max) * 0.5;
+      return divColor(t);
+    }
+    const range = domain.max - domain.min;
+    if (range <= 0) return seqColor(0.5);
+    return seqColor((value - domain.min) / range);
+  }
+
+  function rowFor(stateName, yearIdx) {
+    const s = DATA.states[stateName];
+    if (!s) return null;
+    const year = DATA._meta.years[yearIdx];
+    const fcPeriod = DATA._meta.fc_periods.find(p => p.years.includes(year));
+    const fcShare = (fcPeriod && fcPeriod.name === '15th FC') ? s.fc15_share : s.fc14_share;
+    return {
+      stateName,
+      meta: s,
+      year,
+      yearLabel: DATA._meta.yearLabels[yearIdx],
+      fcPeriod,
+      gsdp: s.gsdp[yearIdx],
+      ownTax: s.ownTax[yearIdx],
+      devolution: s.devolution[yearIdx],
+      grants: s.grants[yearIdx],
+      contribution: s.contribution[yearIdx],
+      fcShare
+    };
+  }
+
+  function computeDomain(view, yearIdx) {
+    const values = [];
+    for (const name of Object.keys(DATA.states)) {
+      const r = rowFor(name, yearIdx);
+      if (!r) continue;
+      const v = view.compute(r);
+      if (typeof v === 'number' && !Number.isNaN(v)) values.push(v);
+    }
+    if (!values.length) return { min: 0, max: 1 };
+    return { min: Math.min(...values), max: Math.max(...values) };
+  }
+
+  /* ───────── render ───────── */
+  function fillStyle(name) {
+    const view = VIEWS[ui.state.view];
+    const r = rowFor(name, ui.state.yearIdx);
+    if (!r) return { color: 'oklch(0.985 0 0 / 0.18)', weight: 0.5, fillColor: 'oklch(0.22 0 0)', fillOpacity: 0.55, className: 'india-state-path no-data' };
+    const v = view.compute(r);
+    return {
+      color: 'oklch(0.985 0 0 / 0.22)',
+      weight: 0.5,
+      fillColor: colorFor(v, view, ui._domain),
+      fillOpacity: 0.92,
+      className: 'india-state-path'
+    };
+  }
+
+  function updateLegend() {
+    const view = VIEWS[ui.state.view];
+    $ind('#india-legend-title').textContent = view.label;
+    const d = ui._domain;
+    const grad = $ind('#india-legend-grad');
+    if (view.diverging) {
+      const max = Math.max(Math.abs(d.min), Math.abs(d.max));
+      grad.style.background = `linear-gradient(90deg, ${divColor(0)} 0%, ${divColor(0.5)} 50%, ${divColor(1)} 100%)`;
+      $ind('#india-legend-min').textContent = view.fmt(-max);
+      $ind('#india-legend-mid').textContent = view.fmt(0);
+      $ind('#india-legend-max').textContent = view.fmt(max);
+    } else {
+      grad.style.background = `linear-gradient(90deg, ${seqColor(0)} 0%, ${seqColor(0.5)} 50%, ${seqColor(1)} 100%)`;
+      $ind('#india-legend-min').textContent = view.fmt(d.min);
+      $ind('#india-legend-mid').textContent = view.fmt((d.min + d.max) / 2);
+      $ind('#india-legend-max').textContent = view.fmt(d.max);
+    }
+  }
+
+  function updateReadout() {
+    const view = VIEWS[ui.state.view];
+    const name = ui.state.hover || ui.state.selected;
+    const label = $ind('.readout-label');
+    const nameEl = $ind('.readout-name');
+    const valEl = $ind('.readout-value');
+    if (!name) {
+      label.textContent = 'Hover a state';
+      nameEl.textContent = '—';
+      valEl.textContent = view.help;
+      valEl.style.color = 'var(--muted-foreground)';
+      valEl.style.fontSize = '11px';
+      return;
+    }
+    const r = rowFor(name, ui.state.yearIdx);
+    if (!r) {
+      label.textContent = 'No fiscal data';
+      nameEl.textContent = name;
+      valEl.textContent = 'UT or excluded from this dataset';
+      valEl.style.color = 'var(--muted-foreground)';
+      valEl.style.fontSize = '12px';
+      return;
+    }
+    label.textContent = `${view.shortLabel} · ${r.yearLabel}`;
+    nameEl.textContent = name;
+    valEl.textContent = view.fmt(view.compute(r));
+    valEl.style.color = 'oklch(0.78 0.16 70)';
+    valEl.style.fontSize = '14px';
+  }
+
+  function repaint() {
+    ui._domain = computeDomain(VIEWS[ui.state.view], ui.state.yearIdx);
+    if (geoLayer) {
+      geoLayer.eachLayer(layer => {
+        const name = layer.feature.properties.ST_NM;
+        layer.setStyle(fillStyle(name));
+      });
+    }
+    updateLegend();
+    updateReadout();
+    renderSummary();
+    if (ui.state.selected) renderDetail(ui.state.selected);
+    updateYearMarker();
+  }
+
+  function updateYearMarker() {
+    const total = DATA._meta.years.length;
+    const pct = (ui.state.yearIdx / (total - 1)) * 100;
+    const marker = root.querySelector('#india-fc-strip .fc-marker');
+    if (marker) marker.style.left = `calc(${pct}% - 1px)`;
+    $ind('#india-year-value').textContent = DATA._meta.yearLabels[ui.state.yearIdx];
+  }
+
+  /* ───────── detail card ───────── */
+  function renderDetail(name) {
+    const detail = $ind('#india-detail');
+    const r = rowFor(name, ui.state.yearIdx);
+    if (!r) {
+      detail.innerHTML = `<div class="india-detail-empty"><div class="eyebrow">${esc(name)}</div><p class="india-detail-empty-body">No fiscal data for this UT / excluded entity in the current dataset.</p></div>`;
+      return;
+    }
+    const s = r.meta;
+    const totalIn = r.devolution + r.grants;
+    const net = totalIn - r.contribution;
+    const isDonor = net < 0;
+    const ratio = r.contribution > 0 ? (totalIn / r.contribution) : 0;
+    const ownTaxPct = (r.ownTax / r.gsdp) * 100;
+
+    detail.innerHTML = `
+      <div class="india-detail-head">
+        <div>
+          <div class="india-detail-name">${esc(name)}</div>
+          <div class="mono" style="font-size:10.5px;letter-spacing:0.04em;color:var(--muted-foreground);text-transform:uppercase;margin-top:2px">${esc(s.region)} · ${esc(s.capital)} · pop ~${s.pop_cr.toFixed(1)} cr</div>
+        </div>
+        <div class="india-detail-meta">${esc(r.yearLabel)}<br/><span style="opacity:0.6">${esc(r.fcPeriod?.name ?? '—')}</span></div>
+      </div>
+
+      <div class="india-stat-grid">
+        <div class="india-stat"><div class="label">GSDP</div><div class="value">₹${fmtComma(r.gsdp)} k cr</div></div>
+        <div class="india-stat"><div class="label">Own tax</div><div class="value">₹${fmtComma(r.ownTax)} k cr</div></div>
+        <div class="india-stat"><div class="label">Devolution in</div><div class="value">₹${fmtComma(r.devolution)} k cr</div></div>
+        <div class="india-stat"><div class="label">Grants in</div><div class="value">₹${fmtComma(r.grants)} k cr</div></div>
+        <div class="india-stat"><div class="label">Contrib. to Center (est.)</div><div class="value">₹${fmtComma(r.contribution)} k cr</div></div>
+        <div class="india-stat ${isDonor ? 'donor' : 'recipient'}"><div class="label">Net flow</div><div class="value">${net >= 0 ? '+' : ''}${fmtComma(net)} k cr</div></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;gap:0.6rem;font-family:var(--font-mono);font-size:11px;color:var(--muted-foreground);margin-bottom:0.85rem">
+        <span>FC share: <span style="color:var(--foreground)">${r.fcShare.toFixed(3)}%</span></span>
+        <span>Own tax / GSDP: <span style="color:var(--foreground)">${ownTaxPct.toFixed(2)}%</span></span>
+        <span>In : Out ratio: <span style="color:${isDonor ? 'oklch(0.7 0.18 30)' : 'oklch(0.7 0.17 162)'}">${ratio.toFixed(2)}×</span></span>
+      </div>
+
+      <div class="india-detail-section-title">10-year history</div>
+      <svg id="india-spark" viewBox="0 0 320 110" preserveAspectRatio="none"></svg>
+      <div class="india-spark-legend">
+        <span><span class="sw" style="background:oklch(0.78 0.16 70)"></span>Devolution + grants</span>
+        <span><span class="sw" style="background:oklch(0.65 0.18 250)"></span>Contribution (est.)</span>
+        <span><span class="sw" style="background:oklch(0.7 0.17 162)"></span>Own tax</span>
+      </div>
+
+      <div class="india-detail-section-title">Pros &amp; Cons</div>
+      <div class="india-proscons">
+        <div class="india-pc pros">
+          <h4>Pros</h4>
+          <ul>${s.pros.map(p => `<li>${esc(p)}</li>`).join('')}</ul>
+        </div>
+        <div class="india-pc cons">
+          <h4>Cons</h4>
+          <ul>${s.cons.map(p => `<li>${esc(p)}</li>`).join('')}</ul>
+        </div>
+      </div>
+    `;
+    drawSpark(s, ui.state.yearIdx);
+  }
+
+  function drawSpark(s, yearIdx) {
+    const svg = $ind('#india-spark');
+    if (!svg) return;
+    const W = 320, H = 110, padL = 32, padR = 8, padT = 8, padB = 18;
+    const innerW = W - padL - padR;
+    const innerH = H - padT - padB;
+    const years = DATA._meta.yearLabels;
+    const n = years.length;
+
+    const inFlow = s.devolution.map((d, i) => d + s.grants[i]);
+    const series = [
+      { name: 'inflow', vals: inFlow, color: 'oklch(0.78 0.16 70)' },
+      { name: 'contribution', vals: s.contribution, color: 'oklch(0.65 0.18 250)' },
+      { name: 'ownTax', vals: s.ownTax, color: 'oklch(0.7 0.17 162)' }
+    ];
+    const allVals = series.flatMap(s => s.vals);
+    const max = Math.max(...allVals) * 1.05;
+    const min = 0;
+
+    const x = i => padL + (i / (n - 1)) * innerW;
+    const y = v => padT + innerH - ((v - min) / (max - min)) * innerH;
+
+    let svgContent = '';
+    // grid
+    const gridSteps = 3;
+    for (let g = 0; g <= gridSteps; g++) {
+      const v = min + (max - min) * (g / gridSteps);
+      const yy = y(v);
+      svgContent += `<line x1="${padL}" x2="${W - padR}" y1="${yy}" y2="${yy}" stroke="oklch(0.985 0 0 / 0.07)" stroke-width="1"/>`;
+      svgContent += `<text x="${padL - 4}" y="${yy + 3}" text-anchor="end" fill="oklch(0.6 0 0)" font-family="ui-monospace, monospace" font-size="8">${Math.round(v)}</text>`;
+    }
+    // x-axis labels (first, mid, last)
+    [0, Math.floor((n - 1) / 2), n - 1].forEach(i => {
+      svgContent += `<text x="${x(i)}" y="${H - 4}" text-anchor="middle" fill="oklch(0.6 0 0)" font-family="ui-monospace, monospace" font-size="8">${years[i]}</text>`;
+    });
+    // selected year highlight
+    svgContent += `<line x1="${x(yearIdx)}" x2="${x(yearIdx)}" y1="${padT}" y2="${padT + innerH}" stroke="var(--foreground)" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>`;
+    // FC period demarcation: vertical at index 0 (13thFC) -> 1 (14th starts) and 5 (15th starts at FY21)
+    [1, 6].forEach(i => {
+      svgContent += `<line x1="${x(i) - (innerW / (n - 1) / 2)}" x2="${x(i) - (innerW / (n - 1) / 2)}" y1="${padT}" y2="${padT + innerH}" stroke="oklch(0.985 0 0 / 0.18)" stroke-width="1" stroke-dasharray="1 3"/>`;
+    });
+    // lines + dots
+    for (const ser of series) {
+      const pts = ser.vals.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+      svgContent += `<polyline points="${pts}" fill="none" stroke="${ser.color}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>`;
+      svgContent += `<circle cx="${x(yearIdx)}" cy="${y(ser.vals[yearIdx])}" r="3" fill="${ser.color}" stroke="oklch(0.145 0 0)" stroke-width="1"/>`;
+    }
+
+    svg.innerHTML = svgContent;
+  }
+
+  function fmtComma(v) {
+    if (Math.abs(v) >= 100) return Math.round(v).toLocaleString('en-IN');
+    return v.toFixed(1);
+  }
+
+  /* ───────── summary cards: top donors / top recipients ───────── */
+  function renderSummary() {
+    const container = $ind('#india-summary');
+    const view = VIEWS[ui.state.view];
+    const ranked = [];
+    for (const name of Object.keys(DATA.states)) {
+      const r = rowFor(name, ui.state.yearIdx);
+      if (!r) continue;
+      ranked.push({ name, value: view.compute(r), row: r });
+    }
+    ranked.sort((a, b) => a.value - b.value);
+
+    const renderRow = (item, i) => `
+      <div class="india-rank-row" data-state="${esc(item.name)}">
+        <span class="rnk">${String(i + 1).padStart(2, '0')}</span>
+        <span class="name">${esc(item.name)}</span>
+        <span class="val">${view.fmt(item.value)}</span>
+      </div>`;
+
+    const isDiv = view.diverging;
+    container.innerHTML = `
+      <div class="india-summary-card">
+        <div class="h">${isDiv ? 'Top net donors' : 'Lowest by ' + view.shortLabel.toLowerCase()}</div>
+        <div class="sub">${isDiv ? 'States subsidising the union — most negative net flow' : view.label} · ${DATA._meta.yearLabels[ui.state.yearIdx]}</div>
+        ${ranked.slice(0, 8).map(renderRow).join('')}
+      </div>
+      <div class="india-summary-card">
+        <div class="h">${isDiv ? 'Top net recipients' : 'Highest by ' + view.shortLabel.toLowerCase()}</div>
+        <div class="sub">${isDiv ? 'States receiving more than they contribute' : view.label} · ${DATA._meta.yearLabels[ui.state.yearIdx]}</div>
+        ${ranked.slice(-8).reverse().map((it, i) => renderRow(it, i)).join('')}
+      </div>
+    `;
+    container.querySelectorAll('.india-rank-row').forEach(row => {
+      row.addEventListener('click', () => selectState(row.dataset.state, true));
+    });
+  }
+
+  /* ───────── interactions ───────── */
+  function selectState(name, scrollMap = false) {
+    ui.state.selected = name;
+    pathByName.forEach((layer, n) => {
+      const el = layer.getElement?.() || layer._path;
+      if (!el) return;
+      el.classList.toggle('selected', n === name);
+    });
+    renderDetail(name);
+    if (scrollMap) {
+      const layer = pathByName.get(name);
+      if (layer && layer.getBounds) {
+        try { map.fitBounds(layer.getBounds(), { padding: [40, 40], maxZoom: 6 }); } catch (e) {}
+      }
+    }
+  }
+
+  function setHover(name) {
+    ui.state.hover = name;
+    pathByName.forEach((layer, n) => {
+      const el = layer._path;
+      if (!el) return;
+      el.classList.toggle('hover', n === name);
+    });
+    updateReadout();
+  }
+
+  function wireControls() {
+    $$ind('.ind-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        $$ind('.ind-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        ui.state.view = btn.dataset.view;
+        repaint();
+      });
+    });
+    const slider = $ind('#india-year');
+    slider.max = DATA._meta.years.length - 1;
+    slider.value = ui.state.yearIdx;
+    slider.addEventListener('input', (e) => {
+      ui.state.yearIdx = parseInt(e.target.value, 10);
+      repaint();
+    });
+
+    // FC strip with year marker
+    const fcStrip = $ind('#india-fc-strip');
+    fcStrip.innerHTML = `
+      <div class="fc-seg fc-13"><span class="fc-label">13th FC · 32% pool</span></div>
+      <div class="fc-seg fc-14"><span class="fc-label">14th FC · 42% pool (FY16-FY20)</span></div>
+      <div class="fc-seg fc-15"><span class="fc-label">15th FC · 41% pool (FY21-FY26)</span></div>
+      <div class="fc-marker" style="left:0"></div>
+    `;
+  }
+
+  /* ───────── map + load ───────── */
+  function buildMap() {
+    map = L.map('india-map', {
+      attributionControl: true,
+      zoomControl: true,
+      worldCopyJump: false,
+      minZoom: 4,
+      maxZoom: 7,
+    }).setView([22.5, 80], 4.5);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      attribution: '&copy; OSM, &copy; CARTO',
+      maxZoom: 7,
+    }).addTo(map);
+
+    geoLayer = L.geoJSON(GEO, {
+      style: f => fillStyle(f.properties.ST_NM),
+      onEachFeature: (feature, layer) => {
+        const name = feature.properties.ST_NM;
+        pathByName.set(name, layer);
+        layer.on('mouseover', () => setHover(name));
+        layer.on('mouseout', () => setHover(null));
+        layer.on('click', () => selectState(name));
+      }
+    }).addTo(map);
+
+    try { map.fitBounds(geoLayer.getBounds(), { padding: [10, 10] }); } catch (e) {}
+  }
+
+  async function bootstrap() {
+    try {
+      const [geoRes, dataRes] = await Promise.all([
+        fetch('india-states.geojson'),
+        fetch('india-fiscal.json')
+      ]);
+      if (!geoRes.ok) throw new Error('GeoJSON HTTP ' + geoRes.status);
+      if (!dataRes.ok) throw new Error('Fiscal JSON HTTP ' + dataRes.status);
+      GEO = await geoRes.json();
+      DATA = await dataRes.json();
+
+      ui.state.yearIdx = DATA._meta.years.length - 1;
+      wireControls();
+      buildMap();
+      repaint();
+    } catch (err) {
+      console.error('India section failed to load:', err);
+      const wrap = $ind('#india-map-wrap');
+      if (wrap) {
+        wrap.innerHTML = `<div style="padding:2rem;color:var(--muted-foreground);font-family:var(--font-mono);font-size:12px">Couldn't load India data.<br/>Make sure the page is served (not opened as a file://) — see SCHEMA.md.<br/><br/><code>${esc(err.message)}</code></div>`;
+      }
+    }
+  }
+
+  bootstrap();
+})();
