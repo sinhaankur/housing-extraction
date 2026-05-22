@@ -830,6 +830,58 @@ function renderMarkers(v) {
     markerLayer.addLayer(m);
     state.markersByName.set(f.properties.name, m);
   }
+  // Auto-fit the map to the currently visible markers so the markers always fill the frame,
+  // not a corner of an empty world. Skip if a single lender is in focus.
+  try {
+    if (v.length >= 2) {
+      const bounds = markerLayer.getBounds();
+      if (bounds.isValid()) map.fitBounds(bounds, { padding: [50, 50], maxZoom: 5 });
+    } else if (v.length === 1) {
+      const c = v[0].geometry.coordinates;
+      map.setView([c[1], c[0]], 4);
+    }
+  } catch (e) { /* swallow — fallback to current view */ }
+  renderWorldEmptyState();
+}
+
+function renderWorldEmptyState() {
+  const panel = document.getElementById('world-detail');
+  if (!panel || panel.querySelector('.india-detail-head')) return; // a lender is open
+  const ranked = visible()
+    .map(f => f.properties)
+    .filter(p => (p.mortgage_market_share_pct ?? 0) > 0)
+    .sort((a, b) => (b.mortgage_market_share_pct || 0) - (a.mortgage_market_share_pct || 0))
+    .slice(0, 10);
+  if (!ranked.length) {
+    panel.innerHTML = `
+      <div class="india-detail-empty">
+        <div class="eyebrow">No matches</div>
+        <p class="india-detail-empty-body">No lenders match the current filter — clear it to see all 33.</p>
+      </div>`;
+    return;
+  }
+  const max = ranked[0].mortgage_market_share_pct || 1;
+  panel.innerHTML = `
+    <div class="india-detail-empty">
+      <div class="eyebrow">Top by mortgage market share</div>
+      <p class="india-detail-empty-body" style="margin-bottom:0.9rem">${visible().length} of ${state.features.length} lenders match. Click any row — or a marker — to see how that one extracts value.</p>
+      <div class="world-rank-list">
+        ${ranked.map((p, i) => `
+          <button class="world-rank-row" data-name="${esc(p.name)}">
+            <span class="rnk">${String(i + 1).padStart(2, '0')}</span>
+            <span class="name">${esc(p.name)}<span class="sub">${esc(p.country)} · ${esc(nice(p.type))}</span></span>
+            <span class="bar-wrap"><span class="bar" style="width:${((p.mortgage_market_share_pct || 0) / max * 100).toFixed(0)}%"></span></span>
+            <span class="val">${(p.mortgage_market_share_pct ?? 0).toFixed(1)}%</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>`;
+  panel.querySelectorAll('.world-rank-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const f = state.features.find(ft => ft.properties.name === row.dataset.name);
+      if (f) openWorldDetail(f.properties);
+    });
+  });
 }
 
 function renderCount(n) { $('#count').textContent = `${n} of ${state.features.length}`; }
